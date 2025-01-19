@@ -10,16 +10,16 @@ import Home from './Home.jsx'
 import Register from './Register.jsx'
 import Login from './Login.jsx'
 import { AuthProvider } from './contexts/AuthContext.jsx';
-import ProtectedRoute from './components/ProtectedRoute.jsx'
+// import ProtectedRoute from './components/ProtectedRoute.jsx'
 const router = createBrowserRouter([
   {
     path: '/',
-    element: (
-      <ProtectedRoute>
+    element: 
+      
         
         <App />
-      </ProtectedRoute>   
-    )
+        
+
   },
   {
     path: '/home',
@@ -37,7 +37,7 @@ const router = createBrowserRouter([
 ]);
 
 
-
+// <ProtectedRoute></ProtectedRoute> 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider> {/* Wrap App ด้วย AuthProvider */}
