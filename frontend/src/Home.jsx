@@ -5,8 +5,9 @@ import Layout from './components/Layout';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 function Home() {
-  const [setMembers] = useState([]);
-  const [setCurrentIndex] = useState(0);
+    
+  // eslint-disable-next-line no-unused-vars
+  const [currentIndex, setCurrentIndex] = useState(0);;
   const [scrolling, setScrolling] = useState(false);
   const items = ["/src/img/3.jpg", 
     "/src/img/2.jpg", 
@@ -28,7 +29,7 @@ function Home() {
   useEffect(() => {
     fetch(`${apiUrl}/Member/`)
       .then((Response) => Response.json())
-      .then((data) => setMembers(data))
+      
       .catch((error) => console.error('Error:', error));
 
     const handleScroll = () => {
@@ -116,6 +117,7 @@ function Home() {
                 </div>
                 {/* ชื่อ service */}
                 <div className='text-white text-[12px] sm:text-xs md:text-sm lg:text-base xl:text-xl mt-2 text-center'>
+                  {/* eslint-disable-next-line react/no-unescaped-entities */}
                   <h1 className='text-2xl sm:text-xs md:text-sm lg:text-base xl:text-2xl font-medium uppercase'>"hair cut"</h1>
                   <h1 className='text-sm sm:text-xs md:text-sm lg:text-sm xl:text-base font-bold'>ตัดผมสวย โดนใจ ด้วยช่างมืออาชีพที่ใส่ใจคุณ</h1>
                 </div>
@@ -127,7 +129,8 @@ function Home() {
                 </div>
                 {/* ชื่อ service */}
                 <div className='text-white text-[12px] sm:text-xs md:text-sm lg:text-base xl:text-xl mt-2 text-center'>
-                  <h1 className='text-2xl  sm:text-xs md:text-sm lg:text-base xl:text-2xl font-medium uppercase'>"shaving"</h1>
+                  {/* eslint-disable-next-line react/no-unescaped-entities */}
+                  <h1 className='text-2xl  sm:text-xs md:text-sm lg:text-base xl:text-2xl font-medium uppercase'> "shaving" </h1>
                   <h1 className='text-sm sm:text-xs md:text-sm lg:text-sm xl:text-base font-bold'>เปลี่ยนทุกสัมผัสให้เรียบเนียนในแบบที่คุณมั่นใจ</h1>
                 </div>
               </div>
@@ -138,6 +141,7 @@ function Home() {
                 </div>
                 {/* ชื่อ service */}
                 <div className='text-white text-[12px] sm:text-xs md:text-sm lg:text-base xl:text-xl mt-2 text-center'>
+                  {/* eslint-disable-next-line react/no-unescaped-entities */}
                   <h1 className='text-2xl sm:text-xs md:text-sm lg:text-base xl:text-2xl font-medium uppercase'>"trimming"</h1>
                   <h1 className='text-sm sm:text-xs md:text-sm lg:text-sm xl:text-base font-bold'>เติมความเป๊ะในทุกเส้น สร้างลุคที่ลงตัว</h1>
                 </div>
@@ -149,6 +153,7 @@ function Home() {
                 </div>
                 {/* ชื่อ service */}
                 <div className='text-white text-[12px] sm:text-xs md:text-sm lg:text-base xl:text-xl mt-2 text-center'>
+                  {/* eslint-disable-next-line react/no-unescaped-entities */}
                   <h1 className='text-2xl sm:text-xs md:text-sm lg:text-base xl:text-2xl font-medium uppercase'>"style&care"</h1>
                   <h1 className='text-sm sm:text-xs md:text-sm lg:text-sm xl:text-base font-bold'>สร้างสไตล์ที่ใช่ พร้อมดูแลเส้นผมให้สุขภาพดี</h1>
                 </div>

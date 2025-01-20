@@ -32,7 +32,7 @@
 // };
 
 // export default Navbar;
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 
 const Navbar = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -60,7 +60,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 w-full bg-black text-white p-4 transition-transform duration-300 ${
+      className={`fixed top-0 left-0 w-full bg-black text-white z-50 p-4 transition-transform duration-300 ${
         isVisible ? 'translate-y-0' : '-translate-y-full'
       }`}
     >
