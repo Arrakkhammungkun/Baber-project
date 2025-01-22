@@ -9,6 +9,16 @@ from django.contrib.auth.hashers import check_password
 import jwt
 import datetime
 from django.conf import settings
+import os
+from django.http import JsonResponse
+from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from werkzeug.utils import secure_filename
+
+
+
+
 
 @api_view(['GET'])
 def example_view(request):
@@ -115,3 +125,37 @@ class LoginAdminAPIView(APIView):
                 return Response({"message": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
         except Member.DoesNotExist:
             return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+UPLOAD_FOLDER = os.path.join(settings.MEDIA_ROOT, 'profile_pics')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@api_view(['POST'])
+def upload_profile(request):
+    if 'profile_image' not in request.FILES:
+        return JsonResponse({"error": "No file part"}, status=400)
+
+    file = request.FILES['profile_image']
+
+    if not ('.' in file.name and file.name.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}):
+        return JsonResponse({"error": "File type not allowed"}, status=400)
+
+    filename = secure_filename(file.name)
+    save_path = os.path.join(settings.MEDIA_ROOT, 'profile_pics', filename)
+    file_path = default_storage.save(save_path, ContentFile(file.read()))
+
+    token = request.headers.get("Authorization").split(" ")[1]
+    payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+    member = Member.objects(id=payload['user_id']).first()
+
+    if not member:
+        return JsonResponse({"error": "User not found"}, status=404)
+
+    member.profile_image = file_path
+    member.save()
+
+    return JsonResponse({"message": "File uploaded successfully", "path": member.profile_image}, status=200)

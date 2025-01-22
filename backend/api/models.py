@@ -12,7 +12,7 @@ class Member(Document):
     phone_number = StringField(max_length=15, null=True, blank=True)
     password = StringField(max_length=255, default="defaultpassword")
     role = StringField(max_length=10, choices=["admin", "user"], default="user")
-    profile_image = StringField(max_length=255, required=False, default="")  # เพิ่มรูปโปรไฟล์
+    profile_image = StringField(max_length=255, null=True, blank=True)
 
 
 

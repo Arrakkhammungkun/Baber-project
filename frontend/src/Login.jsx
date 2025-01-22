@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 const apiUrl =import.meta.env.VITE_API_URL;
+
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const { login } = useAuth();
-
+  const navigate = useNavigate();
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -25,7 +28,18 @@ const Login = () => {
         const { data } = response.data; 
 
         
-        const user = { first_name: data.first_name, email: data.email }; 
+        const user = { first_name: data.first_name, 
+          last_name:data.last_name,
+          email: data.email ,
+          nick_name:data.nick_name,
+          phone_number:data.phone_number,
+          profile_image:data.profile_image,
+          user_id:data.user_id,
+
+        
+        
+        
+        }; 
         const token = data.token;
       
      
@@ -35,8 +49,12 @@ const Login = () => {
         console.log(token);
         console.log('Login successful:', data);  
           
-        
-        window.location.href = '/home'; 
+        setEmail('')
+        setPassword('')
+        if (user && token) {
+          navigate('/home');  
+        }
+
         
       }
     } catch (err) {

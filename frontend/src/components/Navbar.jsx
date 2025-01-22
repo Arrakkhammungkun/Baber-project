@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 
+const apiUrl_img = import.meta.env.VITE_API_IMG;
+
 const Navbar = () => {
+  
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -73,11 +76,11 @@ const Navbar = () => {
           {token ? (
             <div className="flex items-center space-x-4">
               <div className="cursor-pointer" onClick={handleMenuToggle}>
-                {user?.profileImage ? (
+                {user && user.profile_image ? (
                   <img
-                    src={user.profileImage}
+                  src={`${apiUrl_img}${user.profile_image}`}
                     alt="Profile"
-                    className="w-10 h-10 rounded-full"
+                    className="w-10 h-10 rounded-full  shadow-md object-cover"
                   />
                 ) : (
                   <div className="rounded-full w-10 h-10 flex justify-center items-center">
