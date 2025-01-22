@@ -10,6 +10,7 @@ import Home from './Home.jsx'
 import Register from './Register.jsx'
 import Login from './Login.jsx'
 import { AuthProvider } from './contexts/AuthContext.jsx';
+import Login_admin from './Login_admin.jsx';
 // import ProtectedRoute from './components/ProtectedRoute.jsx'
 const router = createBrowserRouter([
   {
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <Login />,
+  },
+  {
+    path: '/login/admin',
+    element: <Login_admin />,
   },
 
 ]);

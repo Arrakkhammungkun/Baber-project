@@ -45,16 +45,68 @@ class LoginAPIView(APIView):
             if member.check_password(password):  
                 payload ={
                     'user_id':str(member.id),
+                    'first_name':member.first_name,
+                    'last_name':member.last_name,
+                    'nick_name':member.nick_name,
                     'email':member.email,
+                    'phone_number':member.phone_number,
+                    'profile_image':member.profile_image,
                     'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
+                    
                 }
                 token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
 
                 return Response({
                     "message": "Login successful",
                     "data": {
-                        "first_name": member.first_name,
-                        "email": member.email,
+                        "user_id":str(member.id),
+                        "first_name":member.first_name,
+                        "last_name":member.last_name,
+                        "nick_name":member.nick_name,
+                        "email":member.email,
+                        "phone_number":member.phone_number,
+                        "profile_image":member.profile_image,
+                        "token": token 
+                    }
+                }, status=status.HTTP_200_OK)
+            
+            else:
+                return Response({"message": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
+        except Member.DoesNotExist:
+            return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class LoginAdminAPIView(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        password = request.data.get("password")
+
+        try:
+            member = Member.objects.get(email=email)  
+
+            if member.role != 'admin':
+                return Response({"message":"Access denined . Admins only ."},status=status.HTTP_403_FORBIDDEN)
+           
+            if member.check_password(password):  
+                payload ={
+                    'user_id':str(member.id),
+                    'email':member.email,
+                    'role':member.role,
+                    'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
+                    
+                }
+                token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+
+                return Response({
+                    "message": "Login successful",
+                    "data": {
+                        "user_id":str(member.id),
+                        "first_name":member.first_name,
+                        "last_name":member.last_name,
+                        "nick_name":member.nick_name,
+                        "email":member.email,
+                        "phone_number":member.phone_number,
+                        "profile_image":member.profile_image,
                         "token": token 
                     }
                 }, status=status.HTTP_200_OK)

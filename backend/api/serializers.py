@@ -10,6 +10,8 @@ class MemberSerializers(serializers.Serializer):
     email = serializers.EmailField()
     phone_number = serializers.CharField(max_length=15, required=False, allow_blank=True)
     password = serializers.CharField(write_only=True)
+    role = serializers.CharField(default="user", read_only=True)  # ไม่ให้แก้ไขผ่าน API
+    profile_image = serializers.CharField(required=False, allow_blank=True)
 
     def validate_password(self, value):
         if len(value) < 8:
