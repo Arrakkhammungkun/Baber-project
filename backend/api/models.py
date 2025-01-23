@@ -1,4 +1,4 @@
-from mongoengine import Document, StringField, EmailField, BooleanField, IntField,DateTimeField
+from mongoengine import Document, StringField, EmailField, BooleanField, IntField,DateTimeField,FileField
 from mongoengine import connect
 from django.contrib.auth.hashers import make_password, check_password
 from datetime import datetime
@@ -33,3 +33,19 @@ class Member(Document):
         
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.email} ({self.role})"
+
+class Service(Document):
+    name = StringField(max_length=100, required=True)  # ชื่อบริการ
+    description = StringField(max_length=255, null=True, blank=True)  # รายละเอียด
+    price = IntField(required=True, min_value=0)  # ราคา
+    duration = IntField(required=True, min_value=0)  # ระยะเวลาในหน่วยนาที
+    image_url = StringField(required=False, null=True, blank=True)  # เปลี่ยนจาก FileField เป็น StringField
+    created_at = DateTimeField(default=datetime.utcnow)  # เวลาสร้าง
+    updated_at = DateTimeField(default=datetime.utcnow)  # เวลาแก้ไขล่าสุด
+
+    def save(self, *args, **kwargs):
+        self.updated_at = datetime.utcnow()
+        return super(Service, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name} - {self.price} Baht ({self.duration} mins)"

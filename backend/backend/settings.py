@@ -78,13 +78,24 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# from mongoengine import connect
+# connect(
+#     config('DB_NAME'),
+#     host=config('DB_HOST'),
+#     port=config('DB_PORT', cast=int)  # แก้ไขตรงนี้เพื่อแปลงเป็น integer
+# )
 from mongoengine import connect
-connect(
-    config('DB_NAME'),
-    host=config('DB_HOST'),
-    port=config('DB_PORT', cast=int)  # แก้ไขตรงนี้เพื่อแปลงเป็น integer
-)
+from decouple import config  # สมมติว่าคุณใช้ decouple ในการอ่าน config
 
+try:
+    # เชื่อมต่อกับ MongoDB Atlas
+    connect(
+        db=config('DB_NAME'),
+        host=config('DB_URI'),
+    )
+    print("Connected to MongoDB Atlas successfully!")
+except Exception as e:
+    print("Failed to connect to MongoDB Atlas:", str(e))
 
 
 # Password validation

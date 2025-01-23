@@ -3,7 +3,7 @@ from . import views
 from .views import MemberList
 
 
-from .views import RegisterAPIView ,LoginAPIView,LoginAdminAPIView,upload_profile
+from .views import RegisterAPIView ,LoginAPIView,LoginAdminAPIView,upload_profile,ServiceListView
 
 urlpatterns = [
     path('example/', views.example_view, name='example'),
@@ -12,6 +12,7 @@ urlpatterns = [
     path('login/',LoginAPIView.as_view(),name='login'),
     path('login/admin',LoginAdminAPIView.as_view(),name='login-admin'),
     path('upload-profile/', views.upload_profile, name='upload-profile'),
+    path('services/', ServiceListView.as_view(), name='service-list'),
 
 
 ] 
