@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from .models import Member
-from .serializers import MemberSerializers
+from .models import Member,Service
+from .serializers import MemberSerializers,ServiceSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -155,7 +155,28 @@ def upload_profile(request):
     if not member:
         return JsonResponse({"error": "User not found"}, status=404)
 
+    # ลบไฟล์เก่าถ้ามี
+    if member.profile_image:
+        old_file_path = os.path.join(settings.MEDIA_ROOT, member.profile_image)
+        if os.path.exists(old_file_path):
+            os.remove(old_file_path)
+
+    # อัปเดตข้อมูลโปรไฟล์
     member.profile_image = file_path
     member.save()
 
     return JsonResponse({"message": "File uploaded successfully", "path": member.profile_image}, status=200)
+
+
+class ServiceListView(APIView):
+    def get(self, request):
+        services = Service.objects.all()
+        serializer = ServiceSerializer(services, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = ServiceSerializer(data=request.data)
+        if serializer.is_valid():
+            service = serializer.save()
+            return Response(ServiceSerializer(service).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
