@@ -12,6 +12,7 @@ import Login from './Login.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import Login_admin from './Login_admin.jsx';
 import AddServiceForm from './components/AddServiceForm.jsx';
+import Add_Service from './Add_Service.jsx';
 // import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 const router = createBrowserRouter([
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
   {
     path: '/add/services',
     element: <AddServiceForm />,
+  },
+  {
+    path: '/admin/add_services',
+    element: < Add_Service />,
   },
 ]);
 
