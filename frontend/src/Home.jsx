@@ -59,6 +59,7 @@ function Home() {
       <Layout>
         <div className="h-full overflow-hidden">
           <div className="bg-[url(/src/img/welcome.jpg)] bg-cover bg-center h-screen w-full flex items-center justify-center bg-fixed">
+          <div className='absolute inset-0 bg-black/50 brightness-50'></div>
             <div className="flex flex-col w-screen mx-10 text-white">
               <div className="grid grid-cols-2 tracking-[-0.75rem]">
                 <h1 className={`text-[2rem] sm:text-[4rem] md:text-[6rem] lg:text-[8rem] xl:text-[11rem] 2xl:text-[12rem] font-extrabold inline-block mb-4 ${scrolling ? 'animate-slide-left-reverse' : 'animate-slide-right'}`}>
