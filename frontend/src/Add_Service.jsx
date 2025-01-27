@@ -1,14 +1,25 @@
-
+import { useEffect, useState } from "react";
+const apiUrl =import.meta.env.VITE_API_URL;
 import Layout from './components/Layout';
+import axios from "axios";
+
+
 const Add_Service = () => {
-  const services = [
-    { id: 1, name: "บริการตัดผมชาย" },
-    { id: 2, name: "บริการสระ-ไดร์ผม" },
-    { id: 3, name: "บริการย้อมผม" },
-    { id: 4, name: "บริการย้อมผม" },
-    { id: 5, name: "บริการย้อมผม" },
-    { id: 6, name: "บริการย้อมผม" },
-  ];
+  const [services, setServices] = useState([]);
+
+
+  useEffect(() => {
+    // ดึงข้อมูลจาก API
+    axios
+      .get(`${apiUrl}/services/`)
+      .then((response) => {
+        setServices(response.data); // เก็บข้อมูลใน state
+      })
+      .catch((error) => {
+        console.error("Error fetching services:", error);
+      });
+  }, []);
+
 
   return (
     <div >
