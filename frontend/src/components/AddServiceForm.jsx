@@ -42,6 +42,7 @@ function AddServiceForm() {
                 price: '',
                 duration: '',
                 imageUrl: '',
+                
             });
            
         } catch (error) {
@@ -51,57 +52,86 @@ function AddServiceForm() {
     };
 
     return (
-        <div>
-            <h2>Add New Service</h2>
+        <div className="bg-transparent h-screen w-full flex justify-center items-center relative">
+            
+            
             <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Name:</label>
-                    <input
-                        type="text"
-                        name="name"
-                        value={service.name}
-                        onChange={handleChange}
-                        required
-                    />
+                <div className='bg-transparent flex justify-center items-center h-screen w-screen relative'>
+                    
+                    <div className='relative mx-auto p-2'>
+                        <h2 className='text-2xl text-white mb-2'>Edit Service</h2>
+                        <div className='border-2 border-white p-2 rounded-xl mb-2 w-[250px] md:w-[350px] sm:w-[250px] xl:[400px] 2xl:[500px] max-w-[500px] sm:max-w-lg md:max-w-xl lg:max-w-2xl'>
+                            <div className='bg-[#D9D9D9] rounded-xl p-2'>
+                            
+
+                                <div>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    placeholder="Name"
+                                    className="w-full bg-black text-white rounded-xl p-2 mb-2 placeholder-white placeholder:text-center"
+                                    value={service.name}
+                                    onChange={handleChange}
+                                    required
+                                />
+                                </div>  
+                        
+                                <div>
+                                    
+                                    <input
+                                        type="number"
+                                        name="price"
+                                        placeholder="Price"
+                                        className="w-full bg-black text-white rounded-xl p-2 mb-2 placeholder-white placeholder:text-center"
+                                        value={service.price}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    
+                                    <input
+                                        type="number"
+                                        name="duration"
+                                        placeholder="Time"
+                                        className="w-full bg-black text-white rounded-xl p-2 mb-2 placeholder-white placeholder:text-center"
+                                        value={service.duration}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    
+                                    <textarea
+                                        name="description"
+                                        placeholder="Details"
+                                        className="w-full bg-black text-white rounded-xl p-2 mb-2 placeholder-white placeholder:text-center"
+                                        value={service.description}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div>
+                                    <input
+                                        type="text"
+                                        name="imageUrl"
+                                        placeholder="Picture"
+                                        className="w-full bg-black text-white rounded-xl p-2 mb-2 placeholder-white placeholder:text-center"
+                                        value={service.imageUrl}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                
+                                
+                            </div>
+                        </div>
+                        <div></div>
+                        <div className='flex justify-end'>
+                                <button type="submit" className='bg-[#00BA9A] text-white rounded-xl py-2 px-4 inline-block jastify-center hover:bg-[#0A836E] transition duration-300'>Save</button>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label>Description:</label>
-                    <textarea
-                        name="description"
-                        value={service.description}
-                        onChange={handleChange}
-                    />
-                </div>
-                <div>
-                    <label>Price:</label>
-                    <input
-                        type="number"
-                        name="price"
-                        value={service.price}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Duration (in minutes):</label>
-                    <input
-                        type="number"
-                        name="duration"
-                        value={service.duration}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Image URL:</label>
-                    <input
-                        type="text"
-                        name="imageUrl"
-                        value={service.imageUrl}
-                        onChange={handleChange}
-                    />
-                </div>
-                <button type="submit">Add Service</button>
+                
+                
             </form>
         </div>
     );
