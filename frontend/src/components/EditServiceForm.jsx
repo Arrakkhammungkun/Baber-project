@@ -3,7 +3,7 @@ import axios from 'axios';
 const apiUrl =import.meta.env.VITE_API_URL;
 
 
-function AddServiceForm() {
+function EditServiceForm() {
     const [service, setService] = useState({
         name: '',
         description: '',
@@ -52,11 +52,11 @@ function AddServiceForm() {
     };
 
     return (
-        <div className="h-screen w-full flex justify-center items-center ">
+        <div className="bg-transparent h-screen w-full flex justify-center items-center relative">
             
             
             <form onSubmit={handleSubmit}>
-                <div className='bg-black/70 flex justify-center items-center h-screen w-screen '>
+                <div className='bg-transparent flex justify-center items-center h-screen w-screen relative'>
                     
                     <div className='relative mx-auto p-2'>
                         <h2 className='text-2xl text-white mb-2'>Edit Service</h2>
@@ -151,4 +151,4 @@ function AddServiceForm() {
     );
 }
 
-export default AddServiceForm;
+export default EditServiceForm;
