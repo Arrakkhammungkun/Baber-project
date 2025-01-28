@@ -9,18 +9,37 @@ const Add_Service = () => {
 
 
   useEffect(() => {
-    // ดึงข้อมูลจาก API
+    
     axios
       .get(`${apiUrl}/services/`)
       .then((response) => {
-        setServices(response.data); // เก็บข้อมูลใน state
+        setServices(response.data); 
       })
       .catch((error) => {
         console.error("Error fetching services:", error);
       });
   }, []);
+  const handleEdit = (service) => {
+   
+    console.log(service); 
+    
+  };
+  const handleDelete = async (serviceId) => {
+    try {
+      const response = await axios.delete(`${apiUrl}/services/${serviceId}/`);
+      console.log("Service deleted:", response.data);
+      
+      setServices((prevServices) =>
+        prevServices.filter((service) => service.id !== serviceId)
+      );
+    } catch (error) {
+      console.error("Error deleting service:", error);
+      alert("เกิดข้อผิดพลาดในการลบบริการ");
+    }
+  };
+  
 
-
+  
   return (
     <div >
         <Layout>

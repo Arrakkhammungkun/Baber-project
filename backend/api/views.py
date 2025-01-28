@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from .models import Member,Service
-from .serializers import MemberSerializers,ServiceSerializer
+from .models import Employee, Member,Service
+from .serializers import EmployeeSerializer, MemberSerializers,ServiceSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -15,7 +15,7 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from werkzeug.utils import secure_filename
-
+from rest_framework.exceptions import NotFound
 
 
 
@@ -179,4 +179,75 @@ class ServiceListView(APIView):
         if serializer.is_valid():
             service = serializer.save()
             return Response(ServiceSerializer(service).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class ServiceDetailView(APIView):
+    def get_object(self, pk):
+        try:
+            return Service.objects.get(id=pk)
+        except Service.DoesNotExist:
+            raise NotFound("Service not found")
+
+    # GET: ดึงข้อมูลบริการตาม ID
+    def get(self, request, pk):
+        service = self.get_object(pk)
+        serializer = ServiceSerializer(service)
+        return Response(serializer.data)
+
+    # PUT: อัปเดตข้อมูลบริการ
+    def put(self, request, pk):
+        service = self.get_object(pk)
+        serializer = ServiceSerializer(service, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # DELETE: ลบบริการตาม ID
+    def delete(self, request, pk):
+        service = self.get_object(pk)
+        service.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+class EmployeeView(APIView):
+    def get(self, request):
+        employees = Employee.objects.all()
+        serializer = EmployeeSerializer(employees, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = EmployeeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class EmployeeDetailView(APIView):
+    def get_object(self, pk):
+        try:
+            return Employee.objects.get(pk=pk)
+        except Employee.DoesNotExist:
+            raise NotFound(detail="Employee not found")
+
+    def get(self, request, pk):
+        employee = self.get_object(pk)
+        serializer = EmployeeSerializer(employee)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        employee = self.get_object(pk)
+        serializer = EmployeeSerializer(employee, data=request.data, partial=False)  # ใส่ False เพื่อบังคับให้ต้องกรอกทุก field
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        employee = self.get_object(pk)
+        serializer = EmployeeSerializer(employee, data=request.data, partial=True)  # ใส่ True เพื่อให้สามารถอัปเดตแค่บาง field ได้
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
