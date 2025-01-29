@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import axios from 'axios';
 const apiUrl =import.meta.env.VITE_API_URL;
+import PropTypes from 'prop-types';
+import Swal from 'sweetalert2';
 
-
-function AddServiceForm() {
+const AddServiceForm=({ isOpen = false, onClose = () => {}, onAddService = () => {} }) => {
     const [service, setService] = useState({
         name: '',
         description: '',
@@ -11,7 +12,20 @@ function AddServiceForm() {
         duration: '',
         imageUrl: ''
     });
-
+    useEffect(() => {
+        if (isOpen) {
+          // ปิดการเลื่อนหน้าจอ
+          document.body.style.overflow = 'hidden';
+        } else {
+          // เปิดการเลื่อนหน้าจอ
+          document.body.style.overflow = 'auto';
+        }
+    
+        // Clean up เมื่อลงจากหน้าหรือเมื่อ modal ปิด
+        return () => {
+          document.body.style.overflow = 'auto';
+        };
+      }, [isOpen]);
     const handleChange = (e) => {
         const { name, value } = e.target;
         setService({
@@ -32,44 +46,52 @@ function AddServiceForm() {
                 image_url: service.imageUrl
             });
 
-            console.log('Service added:', response.data);
-            alert('Service added successfully!');
-
-            // Reset form fields
+            const newService =await response.data;
+            await Swal.fire('สำเร็จ!', 'ข้อมูลโหลดเสร็จเรียบร้อย!', 'success');
+            
+            onAddService(newService);
+            
             setService({
                 name: '',
                 description: '',
                 price: '',
                 duration: '',
                 imageUrl: '',
-                
+                select: '',
             });
-           
+            onClose();
         } catch (error) {
             console.error('Error adding service:', error);
+            Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถโหลดข้อมูลได้!', 'error');
             
         }
     };
-
+    if (!isOpen) return null;
     return (
-        <div className="bg-transparent h-screen w-full flex justify-center items-center relative">
+        <div className=" fixed inset-0 z-50 h-screen w-full flex justify-center items-center ">
             
             
             <form onSubmit={handleSubmit}>
-                <div className='bg-transparent flex justify-center items-center h-screen w-screen relative'>
+                <div className='bg-black/70 flex justify-center items-center h-screen w-screen '>
                     
                     <div className='relative mx-auto p-2'>
-                        <h2 className='text-2xl text-white mb-2'>Edit Service</h2>
-                        <div className='border-2 border-white p-2 rounded-xl mb-2 w-[250px] md:w-[350px] sm:w-[250px] xl:[400px] 2xl:[500px] max-w-[500px] sm:max-w-lg md:max-w-xl lg:max-w-2xl'>
-                            <div className='bg-[#D9D9D9] rounded-xl p-2'>
-                            
+                        <h2 className='text-2xl text-white mb-2'>Add Service</h2>
+                        <div className='border-2 border-white p-2  rounded-xl mb-2 w-[250px] md:w-[350px] sm:w-[250px] xl:[400px] 2xl:[500px] max-w-[500px] sm:max-w-lg md:max-w-xl lg:max-w-2xl'>
+                            <div className='bg-[#D9D9D9] rounded-xl p-2  h-[20rem]'>
 
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="absolute top-1 right-1 text-gray-600 hover:text-gray-800 transition"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className='h-8 w-8' viewBox="0 0 512 512"><path fill="#ffffff" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"/></svg>
+                            </button>
                                 <div>
                                 <input
                                     type="text"
                                     name="name"
-                                    placeholder="Name"
-                                    className="w-full bg-black text-white rounded-xl p-2 mb-2 placeholder-white placeholder:text-center"
+                                    placeholder="New Name"
+                                    className="w-full bg-black text-white rounded-md p-2 mb-2 placeholder-white placeholder:text-center"
                                     value={service.name}
                                     onChange={handleChange}
                                     required
@@ -82,9 +104,10 @@ function AddServiceForm() {
                                         type="number"
                                         name="price"
                                         placeholder="Price"
-                                        className="w-full bg-black text-white rounded-xl p-2 mb-2 placeholder-white placeholder:text-center"
+                                        className="w-full bg-black text-white rounded-md p-2 mb-2 placeholder-white placeholder:text-center"
                                         value={service.price}
                                         onChange={handleChange}
+                                        min={1}
                                         required
                                     />
                                 </div>
@@ -94,9 +117,10 @@ function AddServiceForm() {
                                         type="number"
                                         name="duration"
                                         placeholder="Time"
-                                        className="w-full bg-black text-white rounded-xl p-2 mb-2 placeholder-white placeholder:text-center"
+                                        className="w-full bg-black text-white rounded-md p-2 mb-2 placeholder-white placeholder:text-center"
                                         value={service.duration}
                                         onChange={handleChange}
+                                        min={1}
                                         required
                                     />
                                 </div>
@@ -105,7 +129,7 @@ function AddServiceForm() {
                                     <textarea
                                         name="description"
                                         placeholder="Details"
-                                        className="w-full bg-black text-white rounded-xl p-2 mb-2 placeholder-white placeholder:text-center"
+                                        className="w-full bg-black text-white rounded-md p-2 h-20 mb-1 placeholder-white placeholder:text-center"
                                         value={service.description}
                                         onChange={handleChange}
                                     />
@@ -115,7 +139,7 @@ function AddServiceForm() {
                                         type="text"
                                         name="imageUrl"
                                         placeholder="Picture"
-                                        className="w-full bg-black text-white rounded-xl p-2 mb-2 placeholder-white placeholder:text-center"
+                                        className="w-full bg-black text-white rounded-md p-2 mb-2 placeholder-white placeholder:text-center"
                                         value={service.imageUrl}
                                         onChange={handleChange}
                                     />
@@ -136,5 +160,9 @@ function AddServiceForm() {
         </div>
     );
 }
-
+AddServiceForm.propTypes = {
+    isOpen: PropTypes.bool,
+    onClose: PropTypes.func,
+    onAddService: PropTypes.func,
+};
 export default AddServiceForm;
