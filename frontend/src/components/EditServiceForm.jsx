@@ -87,7 +87,7 @@ function EditServiceForm({ isOpen, onClose, serviceId, onUpdateService}) {
             
             
             <form onSubmit={handleSubmit}>
-                <div className='bg-transparent flex justify-center items-center h-screen w-screen relative'>
+                <div className=' bg-black/70 flex justify-center items-center h-screen w-screen relative'>
                     
                     <div className='relative mx-auto p-2'>
                         <h2 className='text-2xl text-white mb-2 '>Edit Service</h2>
