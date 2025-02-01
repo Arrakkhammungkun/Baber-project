@@ -176,9 +176,9 @@ function EditServiceForm({ isOpen, onClose, serviceId, onUpdateService}) {
     );
 }
 EditServiceForm.propTypes = {
-    isOpen: PropTypes.bool.isRequired,
-    onClose: PropTypes.func.isRequired,
+    isOpen: PropTypes.bool,
+    onClose: PropTypes.func,
     serviceId: PropTypes.string,
-    onUpdateService: PropTypes.func.isRequired, // onClose ต้องเป็น function และต้องส่งมาเสมอ
+    onUpdateService: PropTypes.func, // onClose ต้องเป็น function และต้องส่งมาเสมอ
   };
 export default EditServiceForm;
