@@ -92,7 +92,12 @@ function EditServiceForm({ isOpen, onClose, serviceId, onUpdateService}) {
                     <div className='relative mx-auto p-2'>
                         <h2 className='text-2xl text-white mb-2 '>Edit Service</h2>
                         <div className='border-2 border-white p-2 rounded-xl mb-2 w-[250px] md:w-[350px] sm:w-[250px] xl:[400px] 2xl:[500px] max-w-[500px] sm:max-w-lg md:max-w-xl lg:max-w-2xl'>
+<<<<<<< Updated upstream
                             <div className='bg-[#D9D9D9] rounded-xl p-2 '>
+=======
+                            <div className='bg-[#D9D9D9] rounded-xl p-2'>
+                            
+>>>>>>> Stashed changes
 
                                 <button
                                     type="button"

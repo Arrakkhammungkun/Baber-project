@@ -15,7 +15,11 @@ import AddServiceForm from './components/AddServiceForm.jsx';
 import Add_Service from './Add_Service.jsx';
 import EditServiceForm from './components/EditServiceForm.jsx';
 import Bookingbarber from './Bookingbarber.jsx'; //
+<<<<<<< Updated upstream
 import Manage_Employee from './Manage_Employee.jsx';
+=======
+import Booking_Management from './Booking_Management.jsx';
+>>>>>>> Stashed changes
 // import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 const router = createBrowserRouter([
@@ -56,8 +60,13 @@ const router = createBrowserRouter([
     element: <Bookingbarber />,
   },
   {
+<<<<<<< Updated upstream
     path: 'admin/manage/employees',
     element: <Manage_Employee />,
+=======
+    path: '/admin/booking_management',
+    element: <Booking_Management />,
+>>>>>>> Stashed changes
   },
   
 
