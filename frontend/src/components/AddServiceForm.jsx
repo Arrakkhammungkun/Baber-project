@@ -1,4 +1,4 @@
-import { useState,useEffect } from 'react';
+import { useState} from 'react';
 import axios from 'axios';
 const apiUrl =import.meta.env.VITE_API_URL;
 import PropTypes from 'prop-types';
@@ -12,20 +12,7 @@ const AddServiceForm=({ isOpen = false, onClose = () => {}, onAddService = () =>
         duration: '',
         imageUrl: ''
     });
-    useEffect(() => {
-        if (isOpen) {
-          // ปิดการเลื่อนหน้าจอ
-          document.body.style.overflow = 'hidden';
-        } else {
-          // เปิดการเลื่อนหน้าจอ
-          document.body.style.overflow = 'auto';
-        }
-    
-        // Clean up เมื่อลงจากหน้าหรือเมื่อ modal ปิด
-        return () => {
-          document.body.style.overflow = 'auto';
-        };
-      }, [isOpen]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setService({

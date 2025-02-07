@@ -97,32 +97,51 @@ const Add_Service = () => {
         <hr className='bg-black border-black text-black border-2 px-2' />
       </header>
       <div className="max-w-full mx-auto bg-white shadow-md rounded-lg p-4">
-      {services.map((service) => (
-    <div key={service.id}> 
-        <div className='flex items-start'>
-            <div className="flex justify-between items-center bg-black w-full px-4 p-1 mb-2 rounded-md shadow-sm">
-                <div>
-                    <p className="text-white font-medium bg-black p-3">{service.name}</p>
-                </div>
-            </div> 
-            <div className="flex space-x-2 h-full md:ml-16 ml-8 pt-0 items-start">
-                <button
-                    className="md:px-16 px-5 w-full h-full py-4 bg-[#545454] text-white text-sm rounded-md hover:bg-[#464545]"
-                    onClick={() => handleEdit(service.id)} 
-                >
-                    Edit
-                </button>
-                <button
-                    className="md:px-14 px-5 py-4 bg-red-500 text-white text-sm rounded-md hover:bg-red-600"
-                    onClick={() => handleDelete(service.id)}  
-                >
-                    Delete
-                </button>
-            </div>
-        </div>
-    </div>
-))}
 
+      <table className="w-full  border-gray-600 text-white mt-3 border-separate border-spacing-y-2">
+        <thead className="relative -top-3">
+          <tr className="bg-white text-black">
+            <th className="border-[3px] p-[15px] l border-black border-r-0">No.</th>
+            <th className="border-[3px] p-2 border-black border-r-0">Name</th>
+            <th className="border-[3px] p-2 border-black border-r-0">Desciption</th>
+            <th className="border-[3px] p-2 border-black border-r-0">Price</th>
+            <th className="border-[3px] p-2 border-black border-r-0">Time</th>
+            <th className="border-[3px] p-2 border-black border-r-0">IMG</th>
+            <th className="border-[3px] p-2  border-black">Manage</th>
+          </tr>
+        </thead>
+        <tbody>
+          {services.map((service, index) => (
+            <tr key={service.id} className="bg-black text-white text-center rounded-lg ">
+              <td className="border-[1px] rounded-l-md border-black p-2">{index + 1}</td>
+              <td className="border-[1px] p-2 border-black">{service.name}</td>
+              <td className="border-[1px] p-2 border-black break-words whitespace-pre-line max-w-[200px]">{service.description}</td>
+              <td className="border-[1px] p-2 border-black">{service.price} บาท</td>
+              <td className="border-[1px] p-2 border-black">{service.duration} นาที</td>
+              <td className="w-10 h-10"
+              >
+                  <img src={service.image_url} alt="" />
+              </td>
+
+              <td className="border-[1px] p-2  gap-2 justify-center border-black  rounded-r-md">
+                <div className="flex gap-2 justify-center">
+                <button className="p-2" onClick={() => handleEdit(service.id)}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 512 512">
+                    <path fill="#ffffff" d="M471.6 21.7c-21.9-21.9-57.3-21.9-79.2 0L362.3 51.7l97.9 97.9 30.1-30.1c21.9-21.9 21.9-57.3 0-79.2L471.6 21.7zm-299.2 220c-6.1 6.1-10.8 13.6-13.5 21.9l-29.6 88.8c-2.9 8.6-.6 18.1 5.8 24.6s15.9 8.7 24.6 5.8l88.8-29.6c8.2-2.7 15.7-7.4 21.9-13.5L437.7 172.3 339.7 74.3 172.4 241.7zM96 64C43 64 0 107 0 160L0 416c0 53 43 96 96 96l256 0c53 0 96-43 96-96l0-96c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7-14.3 32-32 32L96 448c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 64z"/>
+                  </svg>
+                </button>
+                <button onClick={() => handleDelete(service.id)} className="p-2 rounded text-white">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 448 512">
+                    <path fill="#db1414" d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z"/>
+                  </svg>
+                </button>
+                </div>
+
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
         <div className='flex justify-end mt-3 mb-8'>
             <button onClick={handleAdd} className="md:px-[8.6rem] px-8 py-4 bg-black text-white text-sm rounded-md hover:bg-[#464545]">
                 +Add
