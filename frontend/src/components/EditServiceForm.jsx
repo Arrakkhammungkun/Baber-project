@@ -13,7 +13,7 @@ function EditServiceForm({ isOpen, onClose, serviceId, onUpdateService}) {
     });
     useEffect(() => {
         if (isOpen && serviceId) {
-            document.body.style.overflow = 'hidden';
+            // document.body.style.overflow = 'hidden';
             axios
                 .get(`${apiUrl}/services/${serviceId}/`)
                 .then((response) => {
@@ -29,11 +29,9 @@ function EditServiceForm({ isOpen, onClose, serviceId, onUpdateService}) {
                     console.error('Error fetching service data:', error);
                 });
             return ()=>{
-                document.body.style.overflow ='auto';
+                // document.body.style.overflow ='auto';
 
             };
-        }else{
-            document.body.style.overflow ='auto';
         }
     }, [isOpen, serviceId,]);
     const handleChange = (e) => {
