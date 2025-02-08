@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import Employee, Member,Service
-from .serializers import EmployeeSerializer, MemberSerializers,ServiceSerializer
+from .serializers import BookingSerializer, EmployeeSerializer, MemberSerializers,ServiceSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -16,7 +16,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from werkzeug.utils import secure_filename
 from rest_framework.exceptions import NotFound
-
+from bson import ObjectId
 
 
 
@@ -257,3 +257,13 @@ class EmployeeDetailView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['POST'])
+def create_booking(request):
+    serializer = BookingSerializer(data=request.data)
+    if serializer.is_valid():
+        booking = serializer.save()
+        response_data = BookingSerializer(booking).data
+        response_data['id'] = str(response_data['id'])  # แปลง ObjectId เป็น string
+        return Response(response_data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

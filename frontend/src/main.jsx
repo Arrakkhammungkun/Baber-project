@@ -16,6 +16,7 @@ import Add_Service from './Add_Service.jsx';
 import EditServiceForm from './components/EditServiceForm.jsx';
 import Bookingbarber from './Bookingbarber.jsx'; //
 import Manage_Employee from './Manage_Employee.jsx';
+import BookingForm from './components/Bookings.jsx';
 // import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 const router = createBrowserRouter([
@@ -58,6 +59,10 @@ const router = createBrowserRouter([
   {
     path: 'admin/manage/employees',
     element: <Manage_Employee />,
+  },
+  {
+    path: 'bookings',
+    element: <BookingForm  />,
   },
   
 
