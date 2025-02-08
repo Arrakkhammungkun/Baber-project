@@ -1,7 +1,8 @@
+from django.forms import DateField
 from mongoengine import Document, StringField, EmailField, BooleanField, IntField,DateTimeField,FileField,ListField, ReferenceField
 from mongoengine import connect
 from django.contrib.auth.hashers import make_password, check_password
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class Member(Document):
@@ -70,3 +71,17 @@ class Employee(Document):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.position})"
+    
+class Booking(Document):
+    customer = ReferenceField(Member, required=True)  # อ้างอิงถึงลูกค้า
+    employee = ReferenceField(Employee, required=True)  # อ้างอิงถึงช่างที่เลือก
+    service = ReferenceField(Service, required=True)  # อ้างอิงถึงบริการที่เลือก
+    date = DateTimeField(required=True)  # วันที่จอง
+    start_time = DateTimeField(required=True)  # เวลาเริ่มต้น
+    end_time = DateTimeField(required=True)  # เวลาสิ้นสุด (คำนวณจาก duration)
+    status = StringField(choices=["pending", "confirmed", "cancelled"], default="pending")  # สถานะการจอง
+    created_at = DateTimeField(default=datetime.utcnow)
+
+    def save(self, *args, **kwargs):
+        self.end_time = self.start_time + timedelta(minutes=self.service.duration)  # คำนวณเวลาสิ้นสุด
+        return super(Booking, self).save(*args, **kwargs)

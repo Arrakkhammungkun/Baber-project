@@ -1,7 +1,11 @@
+from datetime import timedelta
 from rest_framework import serializers
-from .models import Employee, Member,Service  # ใช้ model ที่เป็น MongoEngine Document
+from .models import Booking, Employee, Member,Service  # ใช้ model ที่เป็น MongoEngine Document
 from django.contrib.auth.hashers import make_password
 from django.conf import settings
+from bson import ObjectId
+from django.shortcuts import get_object_or_404
+
 
 class MemberSerializers(serializers.Serializer):
     first_name = serializers.CharField(max_length=100)
@@ -86,3 +90,55 @@ class EmployeeSerializer(serializers.Serializer):
         instance.employee_image_url = validated_data.get('employee_image_url', instance.employee_image_url)
         instance.save()
         return instance
+
+
+
+class ObjectIdField(serializers.Field):
+    def to_representation(self, value):
+        return str(value)
+
+    def to_internal_value(self, data):
+        return ObjectId(data)  # ใช้ ObjectId() เพื่อแปลงกลับ
+
+
+
+class BookingSerializer(serializers.Serializer):
+    id = ObjectIdField(read_only=True)
+    customer = ObjectIdField()
+    employee = ObjectIdField()
+    service = ObjectIdField()
+    date = serializers.DateTimeField()
+    start_time = serializers.DateTimeField()
+    end_time = serializers.DateTimeField(read_only=True)
+    status = serializers.ChoiceField(choices=["pending", "confirmed", "cancelled"], default="pending")
+
+    def validate(self, data):
+        """ ตรวจสอบว่าช่างมีคิวว่างในเวลาที่เลือก """
+        print("Received data:", data)
+        employee = data["employee"]
+        start_time = data["start_time"]
+
+        # ดึงข้อมูลของบริการที่ถูกเลือกจาก ObjectId
+        service = Service.objects.get(id=data["service"])
+
+        # คำนวณเวลาสิ้นสุดจาก duration ของบริการ
+        end_time = start_time + timedelta(minutes=service.duration)
+
+        # ตรวจสอบว่ามีการจองซ้ำในช่วงเวลาดังกล่าวหรือไม่
+        existing_booking = Booking.objects(
+            employee=employee,
+            start_time__lt=end_time,
+            end_time__gt=start_time
+        ).first()
+
+        if existing_booking:
+            raise serializers.ValidationError("ช่างคนนี้ไม่ว่างในช่วงเวลาที่เลือก")
+
+        data['end_time'] = end_time  # เพิ่ม end_time ที่คำนวณได้
+
+        return data
+
+    def create(self, validated_data):
+        booking = Booking(**validated_data)
+        booking.save()
+        return booking

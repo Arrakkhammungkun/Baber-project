@@ -3,7 +3,7 @@ from . import views
 from .views import EmployeeDetailView, MemberList
 
 
-from .views import RegisterAPIView ,LoginAPIView,LoginAdminAPIView,upload_profile,ServiceListView,ServiceDetailView,EmployeeView
+from .views import create_booking,RegisterAPIView ,LoginAPIView,LoginAdminAPIView,upload_profile,ServiceListView,ServiceDetailView,EmployeeView
 
 urlpatterns = [
     path('example/', views.example_view, name='example'),
@@ -15,7 +15,8 @@ urlpatterns = [
     path('services/', ServiceListView.as_view(), name='service-list'),
     path('services/<str:pk>/', ServiceDetailView.as_view(), name='service-detail'),  
     path('employee/', EmployeeView.as_view(), name='employee-list'),
-    path('employee/<str:pk>/', EmployeeDetailView.as_view(), name='employee-detail'),  # เพิ่มเส้นทางสำหรับการแก้ไข
+    path('employee/<str:pk>/', EmployeeDetailView.as_view(), name='employee-detail'),
+    path("bookings/", create_booking, name="create_booking"),  # เพิ่มเส้นทางสำหรับการแก้ไข
 
 
 
