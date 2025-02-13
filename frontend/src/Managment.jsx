@@ -3,7 +3,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 import Layout from "./components/Layout";
 import axios from "axios";
 
-const Bookingbarber = () => {
+const Managment = () => {
   const [services, setServices] = useState([]);
   
 
@@ -109,4 +109,4 @@ const Bookingbarber = () => {
   );
 };
 
-export default Bookingbarber;
+export default Managment;

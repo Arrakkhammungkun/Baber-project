@@ -17,6 +17,7 @@ import EditServiceForm from './components/EditServiceForm.jsx';
 import Bookingbarber from './Bookingbarber.jsx'; //
 import Manage_Employee from './Manage_Employee.jsx';
 import Managment from './Managment.jsx';
+import Booking_service from './Booking_service.jsx';
 // import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 const router = createBrowserRouter([
@@ -63,6 +64,10 @@ const router = createBrowserRouter([
   {
     path: 'admin/manage/managment',
     element: <Managment />,
+  },
+  {
+    path: '/bookingservice',
+    element: <Booking_service />,
   },
   
 
