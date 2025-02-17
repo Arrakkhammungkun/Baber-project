@@ -1,4 +1,32 @@
-/* src/index.css */
+/* Tailwind */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* สไตล์สำหรับ .loader */
+.loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); /* พื้นหลังมืด 50% */
+    display: flex;
+    justify-content: center;  /* จัดกลางแนวนอน */
+    align-items: center;      /* จัดกลางแนวตั้ง */
+    z-index: 9999;  
+}
+
+/* สไตล์สำหรับข้อความ "Loading..." */
+.loading-text {
+    font-weight: bold;
+    font-family: sans-serif;
+    font-size: 30px;
+    animation: l1 1s linear infinite alternate;
+}
+
+/* แอนิเมชันที่ทำให้ข้อความ opacity เปลี่ยนจาก 1 ไปเป็น 0 */
+@keyframes l1 {
+    0% { opacity: 1; } /* ตอนเริ่มต้น */
+    100% { opacity: 0; } /* ตอนจบ */
+}

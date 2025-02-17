@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Employee, Member,Service
+from .models import Booking, Employee, Member,Service
 from .serializers import BookingSerializer, EmployeeSerializer, MemberSerializers,ServiceSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -17,9 +17,11 @@ from django.core.files.base import ContentFile
 from werkzeug.utils import secure_filename
 from rest_framework.exceptions import NotFound
 from bson import ObjectId
-
-
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from django.views.decorators.csrf import csrf_exempt
+import json
+from datetime import datetime, timedelta
 @api_view(['GET'])
 def example_view(request):
     data = {"message": "Hello, this is an API response! 55555555555"}
@@ -102,7 +104,7 @@ class LoginAdminAPIView(APIView):
                     'user_id':str(member.id),
                     'email':member.email,
                     'role':member.role,
-                    'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
+                    'exp': datetime.utcnow() + timedelta(days=1),
                     
                 }
                 token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
@@ -257,13 +259,155 @@ class EmployeeDetailView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
+
+
+
+
+
+@csrf_exempt
 @api_view(['POST'])
 def create_booking(request):
-    serializer = BookingSerializer(data=request.data)
-    if serializer.is_valid():
-        booking = serializer.save()
-        response_data = BookingSerializer(booking).data
-        response_data['id'] = str(response_data['id'])  # แปลง ObjectId เป็น string
-        return Response(response_data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == "POST":
+        try:
+            # แปลงข้อมูลที่ได้รับจาก body เป็น JSON
+            data = json.loads(request.body)
+            serializer = BookingSerializer(data=data)
+            
+            if serializer.is_valid():
+                booking = serializer.save()
+                
+                # ส่งข้อมูลไปยัง WebSocket
+                channel_layer = get_channel_layer()
+                async_to_sync(channel_layer.group_send)(
+                    "queue_updates",
+                    {
+                        "type": "send_queue_update",
+                        "data": BookingSerializer(booking).data,
+                    },
+                )
+
+                return Response({"message": "Booking created successfully"}, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except json.JSONDecodeError:
+            return Response({"error": "Invalid JSON"}, status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['POST'])
+def confirm_booking(request, booking_id):
+    try:
+        booking = Booking.objects.get(id=booking_id)
+        booking.status = "In_progress"
+        booking.save()
+
+        # ส่งข้อมูลไปยัง WebSocket เพื่ออัปเดตสถานะคิว
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "queue_updates", 
+            {
+                "type": "send_queue_update",
+                "data": BookingSerializer(booking).data
+            }
+        )
+
+        return Response({"message": "Booking In_progress successfully"})
+    except Booking.DoesNotExist:
+        return Response({"error": "Booking not found"}, status=404)
+    
+@api_view(['POST'])
+def complete_booking(request, booking_id):
+    try:
+        booking = Booking.objects.get(id=booking_id)
+        booking.status = "completed"
+        booking.save()
+
+        # ส่งข้อมูลไปยัง WebSocket เพื่อแจ้งว่าเสร็จสิ้น
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "queue_updates",
+            {
+                "type": "send_queue_update",
+                "data": BookingSerializer(booking).data
+            }
+        )
+
+        return Response({"message": "คิวเสร็จสิ้นแล้ว"})
+    except Booking.DoesNotExist:
+        return Response({"error": "ไม่พบคิวนี้"}, status=404)
+
+
+@api_view(['DELETE'])
+def delete_booking(request, booking_id):
+    try:
+        booking = Booking.objects.get(id=booking_id)
+        booking.delete()
+
+        # แจ้ง WebSocket ให้ UI อัปเดต
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "queue_updates", {"type": "delete_queue", "booking_id": booking_id}
+        )
+
+        return Response({"message": "คิวถูกลบแล้ว"})
+    except Booking.DoesNotExist:
+        return Response({"error": "ไม่พบคิวนี้"}, status=404)
+
+
+
+@api_view(['GET'])
+def check_availability(request):
+    employee_id = request.GET.get('employeeId')
+    date = request.GET.get('date')  # รูปแบบเช่น "YYYY-MM-DD"
+    time = request.GET.get('time')  # รูปแบบเช่น "HH:MM"
+    
+    # แปลงเวลาจาก string เป็น datetime object
+    try:
+        booking_time = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
+    except ValueError:
+        return Response({"message": "Invalid date or time format."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # ตรวจสอบว่ามีการจองในเวลานั้นหรือไม่
+    bookings = Booking.objects.filter(
+        employee=employee_id,
+        start_time=booking_time
+    )
+
+    
+    if bookings.count() > 0:  # ใช้ count() เพื่อตรวจสอบว่า QuerySet มีข้อมูลหรือไม่
+        return Response({"message": "Time slot is already booked."}, status=status.HTTP_409_CONFLICT)
+    else:
+        return Response({"message": "Time slot is available."}, status=status.HTTP_200_OK)
+    
+
+
+@api_view(['GET'])
+def get_booked_times(request, employee_id, date):
+    try:
+        print(f"Received employee_id: {employee_id}, date: {date}")
+
+        # แปลงวันที่ที่ส่งมาให้เป็น datetime object
+        selected_date = datetime.strptime(date, "%Y-%m-%d")
+
+        # เวลาทั้งหมดที่มีให้เลือก
+        all_times = [
+            "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", 
+            "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"
+        ]
+        
+        # ดึงเวลาที่ถูกจองไปแล้วสำหรับพนักงานที่เลือก
+        booked_slots = Booking.objects.filter(employee=employee_id, date=selected_date)
+
+        # แปลง start_time เป็น string เวลา
+        booked_times = [time.start_time.strftime("%I:%M %p") for time in booked_slots]
+
+        # หาว่าเวลาไหนยังไม่ได้ถูกจอง
+        available_times = [time for time in all_times if time not in booked_times]
+
+        return Response({"available_times": available_times, "booked_times": booked_times})
+    except Exception as e:
+        return Response({"error": str(e)}, status=400)
+
+
+
+

@@ -36,14 +36,17 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+     "daphne",  
     'django.contrib.staticfiles',
     'api',
     'rest_framework',
     'corsheaders',
+    "channels",  
+ 
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # อยู่ในลำดับแรก
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -51,7 +54,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -138,8 +140,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-CORS_ALLOW_ALL_ORIGINS = True
-
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # ระบุ domain ที่ frontend ใช้
+]
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',  # ให้ส่งผลลัพธ์เป็น JSON
@@ -165,3 +169,21 @@ if DEBUG:
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+
+
+
+ASGI_APPLICATION = "api.asgi.application"  # ชื่อโปรเจค
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",  # ใช้ in-memory สำหรับทดสอบ
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],  # ตั้งค่า Redis 
+        },
+    },
+}
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173',
+    'https://localhost:5173', 
+]
