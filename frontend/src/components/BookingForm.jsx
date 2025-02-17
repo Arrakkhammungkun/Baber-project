@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 const apiUrl =import.meta.env.VITE_API_URL;
+// import { useAuth } from '../contexts/AuthContext';
 const BookingForm = () => {
   const [services, setServices] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -8,13 +9,14 @@ const BookingForm = () => {
   const [selectedEmployee, setSelectedEmployee] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  // const { user, token, logout } = useAuth();
 
   useEffect(() => {
     axios.get(`${apiUrl}/services/`).then((res) => setServices(res.data));
     axios.get(`${apiUrl}/employee/`).then((res) => setEmployees(res.data));
   }, []);
-
   const handleBooking = async () => {
+    console.log(selectedEmployee)
     const bookingData = {
       customer: "67925c7a28a366b5a19b5998", // เปลี่ยนเป็น user ที่ล็อกอิน
       service: selectedService,
@@ -22,7 +24,7 @@ const BookingForm = () => {
       date,
       start_time: `${date}T${time}:00Z`, // แปลงเป็น ISO format
     };
-
+    console.log(bookingData)
     try {
       await axios.post(`${apiUrl}/bookings/`, bookingData);
       alert("จองสำเร็จ!");

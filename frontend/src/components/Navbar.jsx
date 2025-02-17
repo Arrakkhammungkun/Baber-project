@@ -55,10 +55,10 @@ const Navbar = () => {
 
         {/* Navigation Links (For desktop) */}
         <div className="hidden md:flex absolute left-1/2 transform -translate-x-1/2 space-x-6">
-          <a href="/home" className="hover:text-gray-300">
+          <a href="/" className="hover:text-gray-300">
             หน้าหลัก
           </a>
-          <a href="/services" className="hover:text-gray-300">
+          <a href="/test_service" className="hover:text-gray-300">
             บริการ
           </a>
           <a href="/about" className="hover:text-gray-300">

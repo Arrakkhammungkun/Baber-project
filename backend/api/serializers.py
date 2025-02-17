@@ -72,7 +72,7 @@ class EmployeeSerializer(serializers.Serializer):
     dob = serializers.DateTimeField()
     position = serializers.CharField(max_length=100)
     status = serializers.CharField(max_length=50)
-    employee_image_url = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    employee_image_url = serializers.CharField(max_length=500, required=False, allow_blank=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
 
@@ -125,11 +125,12 @@ class BookingSerializer(serializers.Serializer):
         end_time = start_time + timedelta(minutes=service.duration)
 
         # ตรวจสอบว่ามีการจองซ้ำในช่วงเวลาดังกล่าวหรือไม่
-        existing_booking = Booking.objects(
+        existing_booking = Booking.objects.filter(
             employee=employee,
             start_time__lt=end_time,
             end_time__gt=start_time
-        ).first()
+        ).first()  # ตรวจสอบว่ามีการจองทับซ้อนหรือไม่
+
 
         if existing_booking:
             raise serializers.ValidationError("ช่างคนนี้ไม่ว่างในช่วงเวลาที่เลือก")

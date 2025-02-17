@@ -60,7 +60,7 @@ class Employee(Document):
     dob = DateTimeField()  # วันเกิด
     position = StringField(max_length=100)  # ตำแหน่ง
     status = StringField(max_length=50)  # สถานะพนักงาน
-    employee_image_url = StringField(max_length=255, blank=True)  # ลิงก์ภาพพนักงาน
+    employee_image_url = StringField(max_length=500, blank=True)  # ลิงก์ภาพพนักงาน
     
     created_at = DateTimeField(default=datetime.utcnow)  # เวลาสร้าง
     updated_at = DateTimeField(default=datetime.utcnow)  # เวลาที่อัปเดตข้อมูลล่าสุด
@@ -79,7 +79,7 @@ class Booking(Document):
     date = DateTimeField(required=True)  # วันที่จอง
     start_time = DateTimeField(required=True)  # เวลาเริ่มต้น
     end_time = DateTimeField(required=True)  # เวลาสิ้นสุด (คำนวณจาก duration)
-    status = StringField(choices=["pending", "confirmed", "cancelled"], default="pending")  # สถานะการจอง
+    status = StringField(choices=["pending", "confirmed", "cancelled","In_progress","completed"], default="pending")  # สถานะการจอง
     created_at = DateTimeField(default=datetime.utcnow)
 
     def save(self, *args, **kwargs):
