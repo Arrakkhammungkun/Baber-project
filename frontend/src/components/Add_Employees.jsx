@@ -63,10 +63,12 @@ const AddEmployees = ({ isOpen = false, onClose = () => {}, onAddEmployee = () =
             });
 
             onClose();
-        } catch (error) {
+        }catch (error) {
             console.error('Error adding employee:', error);
-            Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถเพิ่มพนักงานได้!', 'error');
-        }
+            const errorMessage = error.response?.data?.message || 'ไม่สามารถเพิ่มพนักงานได้!';
+            Swal.fire('เกิดข้อผิดพลาด!', errorMessage, 'error');
+          }
+          
     };
 
     if (!isOpen) return null;

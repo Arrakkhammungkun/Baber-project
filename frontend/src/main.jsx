@@ -16,18 +16,23 @@ import Add_Service from './Add_Service.jsx';
 import EditServiceForm from './components/EditServiceForm.jsx';
 import Bookingbarber from './Bookingbarber.jsx'; //
 import Manage_Employee from './Manage_Employee.jsx';
-import Managment from './Managment.jsx';
-import Booking_service from './Booking_service.jsx';
+import BookingForm from './components/BookingForm.jsx';
+import Booking_Management from './Booking_Management.jsx';
+import Booking from './Test.jsx';
+import AdminQueueStatus from './AdminQueueStatus.jsx';
+import Test_service from './Test_servie.jsx';
+
+
 // import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />,
+    element: <Home />,
   },
   {
     path: '/home',
-    element: <Home />,
+    element: <App />,
   },
   {
     path: '/register',
@@ -62,13 +67,31 @@ const router = createBrowserRouter([
     element: <Manage_Employee />,
   },
   {
-    path: 'admin/manage/managment',
-    element: <Managment />,
+    path: 'bookings',
+    element: <BookingForm  />,
   },
   {
-    path: '/bookingservice',
-    element: <Booking_service />,
+    path: 'admin/manage/bookings',
+    element: <Booking_Management  />,
   },
+  {
+    path: 'test',
+    element: <Booking  />,
+  },
+  {
+    path: 'test_adminQ',
+    element: <AdminQueueStatus  />,
+  },
+  {
+    path: 'test_service',
+    element: <Test_service  />,
+  },
+  {
+    
+    path: '/test_service/:serviceId/bookingbarber', 
+    element: <Bookingbarber />,
+  },
+
   
 
 ]);

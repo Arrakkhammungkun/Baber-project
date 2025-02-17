@@ -8,7 +8,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const { login_Admin } = useAuth();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -21,16 +21,25 @@ const Login = () => {
   
       if (response.status === 200) {
         const { data } = response.data; 
-        const admin = { first_name: data.first_name, email: data.email }; 
+        const user = { first_name: data.first_name,
+          last_name: data.first_name, 
+          email: data.email,
+          profile_image:data.profile_image ,
+          nick_name: data.first_name,
+          phone_number:data.phone_number
+          
+
+        
+        }; 
         const token = data.token;
 
-        login_Admin(admin, token);
+        login(user, token);
       
 
         console.log('Login successful:', data);  
           
         
-        // window.location.href = '/home'; 
+        window.location.href = '/'; 
         
       }
     } catch (err) {
