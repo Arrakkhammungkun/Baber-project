@@ -40,6 +40,8 @@ class ServiceSerializer(serializers.Serializer):
     price = serializers.IntegerField()
     duration = serializers.IntegerField()  # ระยะเวลาในหน่วยนาที
     image_url = serializers.CharField(required=False, allow_blank=True)  # เปลี่ยนจาก SerializerMethodField เป็น CharField
+    status = serializers.ChoiceField(choices=["Active", "Inactive"], default="Active")  # เพิ่มสถานะบริการ
+
 
     def create(self, validated_data):
         image_url = validated_data.pop('image_url', None)  # ดึงลิงก์ของภาพออกมาจาก validated_data
@@ -56,7 +58,8 @@ class ServiceSerializer(serializers.Serializer):
         instance.price = validated_data.get('price', instance.price)
         instance.duration = validated_data.get('duration', instance.duration)
         image_url = validated_data.get('image_url', None)
-
+        instance.status = validated_data.get('status', instance.status)
+        
         if image_url:
             instance.image_url = image_url  # อัปเดตลิงก์ของภาพ
         instance.save()

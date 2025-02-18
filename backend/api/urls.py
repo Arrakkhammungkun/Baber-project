@@ -3,7 +3,7 @@ from . import views
 from .views import EmployeeDetailView, MemberList
 
 
-from .views import get_booked_times,check_availability,delete_booking,complete_booking,confirm_booking,create_booking,RegisterAPIView ,LoginAPIView,LoginAdminAPIView,upload_profile,ServiceListView,ServiceDetailView,EmployeeView
+from .views import ToggleServiceStatusView,get_booked_times,check_availability,delete_booking,complete_booking,confirm_booking,create_booking,RegisterAPIView ,LoginAPIView,LoginAdminAPIView,upload_profile,ServiceListView,ServiceDetailView,EmployeeView
 
 urlpatterns = [
     path('example/', views.example_view, name='example'),
@@ -14,6 +14,7 @@ urlpatterns = [
     path('upload-profile/', views.upload_profile, name='upload-profile'),
     path('services/', ServiceListView.as_view(), name='service-list'),
     path('services/<str:pk>/', ServiceDetailView.as_view(), name='service-detail'),  
+    path('services/<str:pk>/toggle-status/', ToggleServiceStatusView.as_view(), name='toggle-service-status'),
     path('employee/', EmployeeView.as_view(), name='employee-list'),
     path('employee/<str:pk>/', EmployeeDetailView.as_view(), name='employee-detail'),
     path("bookings/", create_booking, name="create_booking"),  # เพิ่มเส้นทางสำหรับการแก้ไ

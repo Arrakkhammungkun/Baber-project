@@ -190,13 +190,13 @@ class ServiceDetailView(APIView):
         except Service.DoesNotExist:
             raise NotFound("Service not found")
 
-    # GET: ดึงข้อมูลบริการตาม ID
+  
     def get(self, request, pk):
         service = self.get_object(pk)
         serializer = ServiceSerializer(service)
         return Response(serializer.data)
 
-    # PUT: อัปเดตข้อมูลบริการ
+   
     def put(self, request, pk):
         service = self.get_object(pk)
         serializer = ServiceSerializer(service, data=request.data)
@@ -205,12 +205,25 @@ class ServiceDetailView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # DELETE: ลบบริการตาม ID
+    
     def delete(self, request, pk):
         service = self.get_object(pk)
         service.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+# เปลี่ยนสถานะ Serice
+class ToggleServiceStatusView(APIView):
+    def patch(self, request, pk):
+        try:
+            service = Service.objects.get(id=pk)
+        except Service.DoesNotExist:
+            return Response({"error": "Service not found"}, status=status.HTTP_404_NOT_FOUND)
 
+        # สลับสถานะ Active <-> Inactive
+        service.status = "Inactive" if service.status == "Active" else "Active"
+        service.save()
+
+        return Response({"message": f"Service status changed to {service.status}"}, status=status.HTTP_200_OK)
 
 
 class EmployeeView(APIView):
