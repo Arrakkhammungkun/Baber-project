@@ -193,12 +193,14 @@ useEffect(() => {
 
 
   const handleBooking = async () => {
+      setIsLoading(true);
       if (!selectedEmployeeId || !selectedTimeText) {
         Swal.fire({
           icon: 'warning',
           title: 'กรุณาเลือกพนักงานและเวลา',
           confirmButtonText: 'ตกลง'
         });
+        setIsLoading(false);
         return;
       }
 
@@ -208,6 +210,7 @@ useEffect(() => {
           title: 'Cannot book a time in the past.',
           confirmButtonText: 'ตกลง'
         });
+        setIsLoading(false);
         return;
       }
     
@@ -217,6 +220,7 @@ useEffect(() => {
           title: 'เวลานี้ถูกจองไปแล้ว',
           confirmButtonText: 'ตกลง'
         });
+        setIsLoading(false);
         return;
       }
     
@@ -242,6 +246,7 @@ useEffect(() => {
         // อัพเดท availableTimes
         const filteredAvailableTimes = availableTimes.filter(time => time !== selectedTimeText.replace("Selected Time: ", ""));
         setAvailableTimes(filteredAvailableTimes);
+        setIsLoading(false);
         setShowModal(false);
       } catch (error) {
         setShowModal(false);
@@ -251,6 +256,7 @@ useEffect(() => {
           title: 'Failed to make booking. Please try again.',
           confirmButtonText: 'ตกลง'
         });
+        setIsLoading(false);
       }
   };
 
@@ -297,7 +303,9 @@ useEffect(() => {
         </div>
 
         {/* Section วัน-เวลา */}
+        
         <p className="text-lg font-bold mt-4">วันที่จอง</p>
+        <hr />
         <div className="mt-2 space-y-2">
           <div className="flex justify-between">
             <strong>วันที่</strong>

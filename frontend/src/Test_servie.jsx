@@ -12,8 +12,8 @@ const Test_service = () => {
     axios
       .get(`${apiUrl}/services/`)
       .then((response) => {
-        setServices(response.data);
-        console.log(response.data);
+        const activeService = response.data.filter((service) => service.status === "Active");
+        setServices(activeService);
       })
       .catch((error) => {
         console.error("Error fetching services:", error);

@@ -33,23 +33,24 @@ class Member(Document):
         return super(Member, self).save(*args, **kwargs)
         
     def __str__(self):
-        return f"{self.first_name} {self.last_name} - {self.email} ({self.role})"
+        return f"{self.first_name} {self.last_name}"
 
 class Service(Document):
-    name = StringField(max_length=100, required=True)  # ชื่อบริการ
-    description = StringField(max_length=255, null=True, blank=True)  # รายละเอียด
-    price = IntField(required=True, min_value=0)  # ราคา
-    duration = IntField(required=True, min_value=0)  # ระยะเวลาในหน่วยนาที
-    image_url = StringField(required=False, null=True, blank=True)  # เปลี่ยนจาก FileField เป็น StringField
-    created_at = DateTimeField(default=datetime.utcnow)  # เวลาสร้าง
-    updated_at = DateTimeField(default=datetime.utcnow)  # เวลาแก้ไขล่าสุด
+    name = StringField(max_length=100, required=True)  
+    description = StringField(max_length=255, null=True, blank=True)  
+    price = IntField(required=True, min_value=0)  
+    duration = IntField(required=True, min_value=0)  
+    image_url = StringField(required=False, null=True, blank=True)  
+    status = StringField(choices=["Active", "Inactive"], default="Active")
+    created_at = DateTimeField(default=datetime.utcnow)  
+    updated_at = DateTimeField(default=datetime.utcnow)  
 
     def save(self, *args, **kwargs):
         self.updated_at = datetime.utcnow()
         return super(Service, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.name} - {self.price} Baht ({self.duration} mins)"
+        return f"{self.name}"
 
 
 class Employee(Document):
@@ -70,7 +71,7 @@ class Employee(Document):
         return super(Employee, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.position})"
+        return f"{self.first_name} {self.last_name}"
     
 class Booking(Document):
     customer = ReferenceField(Member, required=True)  # อ้างอิงถึงลูกค้า
