@@ -21,7 +21,7 @@ import Booking_Management from './Booking_Management.jsx';
 import Booking from './Test.jsx';
 import AdminQueueStatus from './AdminQueueStatus.jsx';
 import Test_service from './Test_servie.jsx';
-
+import Managment from './Managment.jsx';
 
 // import ProtectedRoute from './components/ProtectedRoute.jsx';
 
@@ -90,6 +90,11 @@ const router = createBrowserRouter([
     
     path: '/test_service/:serviceId/bookingbarber', 
     element: <Bookingbarber />,
+  },
+  {
+    
+    path: '/admin/manage', 
+    element: <Managment />,
   },
 
   
