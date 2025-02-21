@@ -6,8 +6,17 @@ import { useParams } from "react-router-dom";
 import Loader from "./components/Loader";
 const apiUrl = import.meta.env.VITE_API_URL;
 import Swal from 'sweetalert2';
+import utc from "dayjs/plugin/utc";
 
+import timezone from "dayjs/plugin/timezone";
+import "dayjs/locale/th"
 const Bookingbarber = () => {
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
+  
+  // ตั้งค่า locale เป็นภาษาไทย
+  dayjs.locale("th");
+  
 
 
   const {serviceId } = useParams();
@@ -119,7 +128,7 @@ const Bookingbarber = () => {
   const handleTimeSelect = (index, time) => {
     if (!isPastTime(time, selectedDate.format("YYYY-MM-DD")) && !isBooked(time)) {
       setSelectedTime(index);
-      setSelectedTimeText(`Selected Time: ${time}`);
+      setSelectedTimeText(`${time}`);
     }
   };
 
@@ -163,8 +172,35 @@ useEffect(() => {
   const selectedTimeFormatted = dayjs(
     `${selectedDate.format("YYYY-MM-DD")} ${selectedTimeText.replace("Selected Time: ", "").trim()}`,
     "YYYY-MM-DD h:mm A"
-  ).format("YYYY-MM-DDTHH:mm:ss[Z]");
+  ).utc().local().format("YYYY-MM-DDTHH:mm:ss[Z]");
 
+  // const selectedTimeFormatted = dayjs(
+  //   `${selectedDate.format("YYYY-MM-DD")} ${selectedTimeText.replace("Selected Time: ", "").trim()}`,
+  //   "YYYY-MM-DD h:mm A"
+  // ).local().utc().format("YYYY-MM-DDTHH:mm:ss[Z]");
+
+  // const selectedTimeFormatted = dayjs(
+  //   `${selectedDate.format("YYYY-MM-DD")} ${selectedTimeText.replace("Selected Time: ", "").trim()}`,
+  //   "YYYY-MM-DD h:mm A"
+  // ).local().utc().format("YYYY-MM-DDTHH:mm:ss[Z]"); // ส่งเวลาใน UTC
+
+
+
+
+
+  const convertToThaiTime = (time) => {
+    const [hour, minute, period] = time.match(/(\d+):(\d+) (\w+)/).slice(1);
+    let thaiHour = parseInt(hour, 10);
+    
+    if (period === "PM" && thaiHour !== 12) {
+      thaiHour += 12;
+    } else if (period === "AM" && thaiHour === 12) {
+      thaiHour = 0;
+    }
+  
+    return `${thaiHour}:${minute} น.`;
+  };
+  
   const formatTime = (timeString) => {
     if (!timeString) return "ยังไม่เลือก";
 
@@ -188,7 +224,7 @@ useEffect(() => {
         hours = 0;
     }
 
-    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")} โมง`;
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")} น`;
 };
 
 
@@ -231,7 +267,7 @@ useEffect(() => {
         date: selectedDate.format("YYYY-MM-DD"),
         start_time: selectedTimeFormatted
       };
-
+        console.log(selectedTimeFormatted)
       try {
         const response = await axios.post(`${apiUrl}/bookings/`, bookingData);
         console.log("Booking successful:", response.data);
@@ -240,7 +276,8 @@ useEffect(() => {
           title: 'Booking successful!',
           confirmButtonText: 'ตกลง'
         });
-
+        console.log("booking",bookingData)
+        
         setBookedTimes((prevBookedTimes) => [...prevBookedTimes, selectedTimeText.replace("Selected Time: ", "")]);
     
         // อัพเดท availableTimes
@@ -309,7 +346,7 @@ useEffect(() => {
         <div className="mt-2 space-y-2">
           <div className="flex justify-between">
             <strong>วันที่</strong>
-            <span>{convertDateToThaiFormat(selectedDate.format("DD MMMM YYYY"))}</span>
+            <span>{selectedDate.format("DD MMMM YYYY")}</span>
           </div>
           <div className="flex justify-between">
             <strong>เวลา</strong>
@@ -399,7 +436,7 @@ useEffect(() => {
                   <button className="text-white hover:text-black" onClick={() => setSelectedDate(prev => prev.add(1, "month"))}>&gt;</button>
                 </div>
                 <div className="grid grid-cols-7 text-center">
-                  {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(day => (
+                  {["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"].map(day => (
                     <div key={day} className="font-semibold text-white">{day}</div>
                   ))}
                   {generateCalendar().map((day, index) => {
@@ -417,7 +454,7 @@ useEffect(() => {
                   })}
                 </div>
               </div>
-              <div className="text-center text-lg font-semibold text-gray-700 my-2">Selected Date: {selectedDate.format("DD MMMM YYYY")}</div>
+              <div className="text-center text-lg font-semibold text-gray-700 my-2">เลือกวันที่ : {selectedDate.format("DD MMMM YYYY")}</div>
 
               {/* Time Selector */}
               <div className="flex flex-col space-y-2 my-4 w-full justify-center">
@@ -442,7 +479,7 @@ useEffect(() => {
                         disabled={isDisabled}
                         onClick={() => !isDisabled && handleTimeSelect(index, time)}
                       >
-                        {time}
+                        {convertToThaiTime(time)}
                       </button>
                     );
                   })}
@@ -454,7 +491,7 @@ useEffect(() => {
 
 
                 
-                {selectedTimeText && <div className="text-center text-lg font-semibold text-gray-700 my-2">{selectedTimeText}</div>}
+                {selectedTimeText && <div className="text-center text-lg font-semibold text-gray-700 my-2">เวลาที่เลือก : {convertToThaiTime(selectedTimeText)}</div>}
               </div>
               <div className="flex justify-center gap-4 mt-6">
                 <button onClick={handleBooking_modal} className="w-full py-2 bg-black text-white rounded-md hover:bg-gray-700">
