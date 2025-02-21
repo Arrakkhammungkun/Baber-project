@@ -1,10 +1,10 @@
 from django.forms import DateField
 from mongoengine import Document, StringField, EmailField, BooleanField, IntField,DateTimeField,FileField,ListField, ReferenceField
-from mongoengine import connect
+from mongoengine import connect,DoesNotExist
 from django.contrib.auth.hashers import make_password, check_password
 from datetime import datetime, timedelta
 
-
+from django.utils import timezone
 class Member(Document):
     first_name = StringField(max_length=100, default="DefaultFirstName")
     last_name = StringField(max_length=100, default="DefaultLastName")
@@ -74,15 +74,87 @@ class Employee(Document):
         return f"{self.first_name} {self.last_name}"
     
 class Booking(Document):
-    customer = ReferenceField(Member, required=True)  # อ้างอิงถึงลูกค้า
-    employee = ReferenceField(Employee, required=True)  # อ้างอิงถึงช่างที่เลือก
-    service = ReferenceField(Service, required=True)  # อ้างอิงถึงบริการที่เลือก
-    date = DateTimeField(required=True)  # วันที่จอง
+    customer = ReferenceField(Member, required=True)  
+    employee = ReferenceField(Employee, required=True)  
+    service = ReferenceField(Service, required=True)  
+    date = DateTimeField(required=True)  
     start_time = DateTimeField(required=True)  # เวลาเริ่มต้น
     end_time = DateTimeField(required=True)  # เวลาสิ้นสุด (คำนวณจาก duration)
     status = StringField(choices=["pending", "confirmed", "cancelled","In_progress","completed"], default="pending")  # สถานะการจอง
+    queue_position = IntField(default=0)  # คิวลำดับของช่างในวันนั้น
     created_at = DateTimeField(default=datetime.utcnow)
-
+    
     def save(self, *args, **kwargs):
+        """ คำนวณคิวของช่าง """
+        existing_bookings = Booking.objects.filter(
+            employee=self.employee,
+            date=self.date
+        ).order_by("start_time")
+        
+        self.queue_position = existing_bookings.count() + 1  # กำหนดลำดับคิวให้เป็นลำดับถัดไป
+
         self.end_time = self.start_time + timedelta(minutes=self.service.duration)  # คำนวณเวลาสิ้นสุด
         return super(Booking, self).save(*args, **kwargs)
+    
+class DashboardSummary(Document):
+    # วันที่สรุป (อาจใช้เป็นวันที่ของข้อมูล)
+    summary_date = DateTimeField()  # ใช้ DateTimeField ของ mongoengine
+
+    # จำนวนลูกค้าที่จองคิววันนี้
+    bookings_today = IntField(default=0)
+    # จำนวนลูกค้าที่รับบริการแล้ว (เช่น status = "completed")
+    served_customers = IntField(default=0)
+    # คิวที่กำลังดำเนินการ (status = "In_progress")
+    in_progress_count = IntField(default=0)
+    # รายได้รวมของวัน
+    revenue_day = IntField(default=0)
+    # รายได้รวมของเดือน
+    revenue_month = IntField(default=0)
+    # รายได้รวมของปี
+    revenue_year = IntField(default=0)
+            
+    # เวลาที่อัปเดตล่าสุด
+    updated_at = DateTimeField(default=datetime.utcnow)
+    
+    def __str__(self):
+        return f"Dashboard Summary for {self.summary_date.strftime('%Y-%m-%d')}"
+    
+def update_dashboard_summary( booking_date, status):
+    """ อัปเดต Dashboard Summary ตามสถานะการจอง """
+    today = booking_date.date()  # ดึงวันที่จากการจอง
+    print(f"Updating summary for {today} with status: {status}")  # log status และ date สำหรับตรวจสอบ
+
+    # ค้นหาข้อมูลใน DashboardSummary ตามวันที่
+    summary = DashboardSummary.objects.filter(summary_date=today).first()
+
+    if not summary:
+        # ถ้าไม่มีข้อมูลสรุปของวันที่นี้ให้สร้างใหม่
+        summary = DashboardSummary.objects.create(
+            summary_date=today,
+            bookings_today=0,
+            served_customers=0,
+            in_progress_count=0,
+            revenue_day=0,
+            revenue_month=0,
+            revenue_year=0,
+            updated_at=booking_date
+        )
+
+    # ตรวจสอบสถานะของการจองและอัปเดตค่าต่างๆ
+    if status == 'create':
+        summary.bookings_today += 1  # เพิ่มจำนวนการจองวันนี้
+        print(f"Bookings today increased: {summary.bookings_today}")  # log เพิ่มการจอง
+    elif status == 'cancelled':
+        summary.bookings_today -= 1  # ลดจำนวนการจองวันนี้
+        summary.in_progress_count -= 1  # ลดจำนวนคิวที่กำลังดำเนินการ
+        print(f"Booking cancelled, bookings today: {summary.bookings_today}, in progress: {summary.in_progress_count}")
+    elif status == 'In_progress':
+        summary.in_progress_count += 1  # เพิ่มจำนวนคิวที่กำลังดำเนินการ
+        print(f"In progress, in progress count: {summary.in_progress_count}")
+    elif status == 'completed':
+        summary.in_progress_count -= 1
+        summary.served_customers += 1  # เพิ่มจำนวนลูกค้าที่รับบริการแล้ว
+        print(f"Booking confirmed, served customers: {summary.served_customers}")
+
+    summary.save()  # บันทึกการเปลี่ยนแปลงใน Dashboard Summary
+    print("Summary updated successfully.")  # log การอัปเดตเสร็จสิ้น
