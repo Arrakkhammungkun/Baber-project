@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from .models import Booking, Employee, Member,Service
-from .serializers import BookingSerializer, EmployeeSerializer, MemberSerializers,ServiceSerializer
+from .models import Booking, Employee, Member,Service,DashboardSummary,update_dashboard_summary 
+from .serializers import BookingSerializer, EmployeeSerializer, MemberSerializers,ServiceSerializer,DashboardSummarySerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -22,6 +22,7 @@ from asgiref.sync import async_to_sync
 from django.views.decorators.csrf import csrf_exempt
 import json
 from datetime import datetime, timedelta
+from django.utils import timezone
 @api_view(['GET'])
 def example_view(request):
     data = {"message": "Hello, this is an API response! 55555555555"}
@@ -290,6 +291,19 @@ def create_booking(request):
             
             if serializer.is_valid():
                 booking = serializer.save()
+
+                booking_date_str = request.data.get('date')  # ได้ค่ามาเป็น string
+                booking_status = 'create'
+
+                # แปลง booking_date เป็น datetime object
+                booking_date = datetime.strptime(booking_date_str, "%Y-%m-%d") 
+
+                print(f"Booking date: {booking_date}, Status: {booking_status}")
+                print(f"Received booking_date: {booking_date} (type: {type(booking_date)})")
+
+                # เรียกใช้ฟังก์ชัน update_dashboard_summary
+                update_dashboard_summary(booking_date, booking_status)
+
                 
                 # ส่งข้อมูลไปยัง WebSocket
                 channel_layer = get_channel_layer()
@@ -306,13 +320,19 @@ def create_booking(request):
 
         except json.JSONDecodeError:
             return Response({"error": "Invalid JSON"}, status=status.HTTP_400_BAD_REQUEST)
-        
+    
 @api_view(['POST'])
 def confirm_booking(request, booking_id):
     try:
         booking = Booking.objects.get(id=booking_id)
         booking.status = "In_progress"
         booking.save()
+
+        booking_date = booking.date
+        status = booking.status
+        print(f"Booking date: {booking_date}, Status: {status}")
+        # เรียกใช้ update_dashboard_summary และส่งอาร์กิวเมนต์ที่จำเป็น
+        update_dashboard_summary(booking_date, status)
 
         # ส่งข้อมูลไปยัง WebSocket เพื่ออัปเดตสถานะคิว
         channel_layer = get_channel_layer()
@@ -335,14 +355,29 @@ def complete_booking(request, booking_id):
         booking.status = "completed"
         booking.save()
 
-        # ส่งข้อมูลไปยัง WebSocket เพื่อแจ้งว่าเสร็จสิ้น
+        
+        # เปลี่ยนจาก booking.booking_date เป็น booking.date (หรือใช้ชื่อ field ที่ถูกต้อง)
+        booking_date = booking.date  
+        status = 'completed' 
+        print(f"Booking date: {booking_date}, Status: {status}")
+        service = booking.service  # ดึงข้อมูล Service ที่เชื่อมโยงกับ Booking
+
+        price = service.price if service else 0  # ดึงราคา จาก Service (ถ้ามี)
+
+        # อัปเดตยอดเงินใน Dashboard Summary
+        summary = DashboardSummary.objects.filter(summary_date=booking_date.date()).first()
+        if summary:
+            summary.revenue_day += price
+            summary.revenue_month += price
+            summary.revenue_year += price
+            summary.save()
+
+        update_dashboard_summary(booking_date, status)
+
+        booking.delete()
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
-            "queue_updates",
-            {
-                "type": "send_queue_update",
-                "data": BookingSerializer(booking).data
-            }
+            "queue_updates", {"type": "delete_queue", "booking_id": booking_id}
         )
 
         return Response({"message": "คิวเสร็จสิ้นแล้ว"})
@@ -356,7 +391,7 @@ def delete_booking(request, booking_id):
         booking = Booking.objects.get(id=booking_id)
         booking.delete()
 
-        # แจ้ง WebSocket ให้ UI อัปเดต
+       
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             "queue_updates", {"type": "delete_queue", "booking_id": booking_id}
@@ -371,23 +406,23 @@ def delete_booking(request, booking_id):
 @api_view(['GET'])
 def check_availability(request):
     employee_id = request.GET.get('employeeId')
-    date = request.GET.get('date')  # รูปแบบเช่น "YYYY-MM-DD"
-    time = request.GET.get('time')  # รูปแบบเช่น "HH:MM"
+    date = request.GET.get('date')  
+    time = request.GET.get('time')  
     
-    # แปลงเวลาจาก string เป็น datetime object
+   
     try:
         booking_time = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
     except ValueError:
         return Response({"message": "Invalid date or time format."}, status=status.HTTP_400_BAD_REQUEST)
     
-    # ตรวจสอบว่ามีการจองในเวลานั้นหรือไม่
+ 
     bookings = Booking.objects.filter(
         employee=employee_id,
         start_time=booking_time
     )
 
     
-    if bookings.count() > 0:  # ใช้ count() เพื่อตรวจสอบว่า QuerySet มีข้อมูลหรือไม่
+    if bookings.count() > 0:  
         return Response({"message": "Time slot is already booked."}, status=status.HTTP_409_CONFLICT)
     else:
         return Response({"message": "Time slot is available."}, status=status.HTTP_200_OK)
@@ -399,22 +434,22 @@ def get_booked_times(request, employee_id, date):
     try:
         print(f"Received employee_id: {employee_id}, date: {date}")
 
-        # แปลงวันที่ที่ส่งมาให้เป็น datetime object
+        
         selected_date = datetime.strptime(date, "%Y-%m-%d")
 
-        # เวลาทั้งหมดที่มีให้เลือก
+      
         all_times = [
             "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", 
             "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"
         ]
         
-        # ดึงเวลาที่ถูกจองไปแล้วสำหรับพนักงานที่เลือก
+        
         booked_slots = Booking.objects.filter(employee=employee_id, date=selected_date)
 
-        # แปลง start_time เป็น string เวลา
+        
         booked_times = [time.start_time.strftime("%I:%M %p") for time in booked_slots]
 
-        # หาว่าเวลาไหนยังไม่ได้ถูกจอง
+        
         available_times = [time for time in all_times if time not in booked_times]
 
         return Response({"available_times": available_times, "booked_times": booked_times})
@@ -422,5 +457,120 @@ def get_booked_times(request, employee_id, date):
         return Response({"error": str(e)}, status=400)
 
 
+@api_view(['GET'])
+def get_booking_queue(request):
+    bookings = Booking.objects.filter(status__in=["pending", "In_progress"]).order_by("employee", "start_time")
+    
+    employee_queue = {}  
+    queue_data = []  
+
+    
+    for booking in bookings:
+        employee_id = str(booking.employee.id)
+        
+       
+        if employee_id not in employee_queue:
+            employee_queue[employee_id] = 0  
+
+        
+        queue_number = employee_queue[employee_id]
+        employee_queue[employee_id] += 1
+
+       
+        queue_data.append({
+            "queue_number": queue_number,
+            "id": str(booking.id),
+            "customer": {
+                "id": str(booking.customer.id),
+                "first_name": booking.customer.first_name,
+                "last_name": booking.customer.last_name,
+                "email": booking.customer.email,
+                "profile": booking.customer.profile_image,
+            },
+            "employee": {
+                "id": employee_id,
+                "first_name": booking.employee.first_name,
+                "last_name": booking.employee.last_name,
+                "position": booking.employee.position,
+                "profile": booking.employee.employee_image_url,
+                "nickname": booking.employee.nickname,
+                "gender": booking.employee.gender,
+                "birthday": booking.employee.dob
+            },
+            "service": {
+                "id": str(booking.service.id),
+                "description": booking.service.description,
+                "name": booking.service.name,
+                "price": booking.service.price,
+                "duration": booking.service.duration,
+                "image_url": booking.service.image_url
+            },
+            "start_time": booking.start_time,
+            "end_time": booking.end_time,
+            "status": booking.status,
+        })
+    
+    
+    return Response(queue_data, status=status.HTTP_200_OK)
 
 
+class DashboardSummaryAPIView(APIView):
+    def get(self, request):
+        
+        summary = DashboardSummary.objects.order_by('-summary_date').first()
+        if not summary:
+            return Response({"message": "No dashboard summary available"}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = DashboardSummarySerializer(summary)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_revenue_in_period(self, start_date, end_date):
+        """คำนวณรายได้รวมในช่วงเวลาที่กำหนด"""
+        summaries = DashboardSummary.objects.filter(summary_date__gte=start_date, summary_date__lte=end_date)
+        total_revenue = 0
+        for summary in summaries:
+            total_revenue += summary.revenue_day
+        return total_revenue
+    
+    def get_revenue_current_day(self, request):
+        """ดูรายได้ในวันปัจจุบัน"""
+        end_date = timezone.now()
+        start_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0)  # เริ่มต้นตั้งแต่เที่ยงคืน
+
+        total_revenue = self.get_revenue_in_period(start_date, end_date)
+        
+        return Response({"total_revenue": total_revenue, "period": "Today"})
+    
+    def get_revenue_current_month(self, request):
+        """ดูรายได้ในเดือนปัจจุบัน"""
+        end_date = timezone.now()
+        start_date = end_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)  # เริ่มต้นตั้งแต่วันที่ 1 ของเดือน
+
+        total_revenue = self.get_revenue_in_period(start_date, end_date)
+        
+        return Response({"total_revenue": total_revenue, "period": "Current month"})
+    def get_revenue_last_7_days(self, request):
+        """ดูรายได้ใน 7 วันที่ผ่านมา"""
+        end_date = timezone.now()
+        start_date = end_date - timedelta(days=7)
+        
+        total_revenue = self.get_revenue_in_period(start_date, end_date)
+        
+        return Response({"total_revenue": total_revenue, "period": "Last 7 days"})
+
+    def get_revenue_last_month(self, request):
+        """ดูรายได้ใน 1 เดือนที่ผ่านมา"""
+        end_date = timezone.now()
+        start_date = end_date - timedelta(days=30)
+        
+        total_revenue = self.get_revenue_in_period(start_date, end_date)
+        
+        return Response({"total_revenue": total_revenue, "period": "Last 1 month"})
+    
+    def get_revenue_last_3_months(self, request):
+        """ดูรายได้ใน 3 เดือนที่ผ่านมา"""
+        end_date = timezone.now()
+        start_date = end_date - timedelta(days=90)
+        
+        total_revenue = self.get_revenue_in_period(start_date, end_date)
+        
+        return Response({"total_revenue": total_revenue, "period": "Last 3 months"})

@@ -1,6 +1,6 @@
 from datetime import timedelta
 from rest_framework import serializers
-from .models import Booking, Employee, Member,Service  # ใช้ model ที่เป็น MongoEngine Document
+from .models import Booking, Employee, Member,Service,DashboardSummary  # ใช้ model ที่เป็น MongoEngine Document
 from django.contrib.auth.hashers import make_password
 from django.conf import settings
 from bson import ObjectId
@@ -114,7 +114,8 @@ class BookingSerializer(serializers.Serializer):
     start_time = serializers.DateTimeField()
     end_time = serializers.DateTimeField(read_only=True)
     status = serializers.ChoiceField(choices=["pending", "confirmed", "cancelled"], default="pending")
-
+    queue_position = serializers.IntegerField(read_only=True)
+    
     def validate(self, data):
         """ ตรวจสอบว่าช่างมีคิวว่างในเวลาที่เลือก """
         print("Received data:", data)
@@ -143,6 +144,25 @@ class BookingSerializer(serializers.Serializer):
         return data
 
     def create(self, validated_data):
+        """ กำหนด queue_position ก่อนบันทึก """
+        employee = validated_data["employee"]
+        date = validated_data["date"]
+
+        existing_bookings = Booking.objects.filter(employee=employee, date=date).order_by("start_time")
+        queue_position = existing_bookings.count() + 1  # คำนวณลำดับคิว
+
+        validated_data["queue_position"] = queue_position
         booking = Booking(**validated_data)
         booking.save()
         return booking
+
+
+class DashboardSummarySerializer(serializers.Serializer):
+    summary_date = serializers.DateTimeField()
+    bookings_today = serializers.IntegerField()
+    served_customers = serializers.IntegerField()
+    in_progress_count = serializers.IntegerField()
+    revenue_day = serializers.IntegerField()
+    revenue_month = serializers.IntegerField()
+    revenue_year = serializers.IntegerField()
+    updated_at = serializers.DateTimeField()

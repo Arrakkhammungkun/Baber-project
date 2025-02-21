@@ -9,25 +9,25 @@ const Booking_Management = () => {
   const [queue, setQueue] = useState([]);
   const [socket, setSocket] = useState(null);
 
-
+  
   useEffect(() => {
     const newSocket = new WebSocket(`${URLSOCKET}/ws/queue/`);
     setSocket(newSocket);
 
     newSocket.onopen = () => {
       console.log("Connected to WebSocket");
-      newSocket.send(JSON.stringify({ action: "fetch_queue" })); // ขอข้อมูลคิว
+      newSocket.send(JSON.stringify({ action: "fetch_queue" }));
     };
 
     newSocket.onmessage = (event) => {
       console.log("WebSocket received:", event.data);
       try {
         const data = JSON.parse(event.data);
-    
+        console.log("Parsed data:", data);
         if (data.delete) {
           setQueue((prevQueue) => prevQueue.filter(q => q.id !== data.delete));
         } else if (Array.isArray(data)) {
-          setQueue(data);
+          setQueue(data);  
         } else if (data && typeof data === "object") {
           setQueue((prevQueue) => {
             const updatedQueue = prevQueue.map((q) =>
@@ -35,21 +35,17 @@ const Booking_Management = () => {
             );
             return prevQueue.some((q) => q.id === data.id) ? updatedQueue : [...prevQueue, data];
           });
-        } else {
-          console.error("Unexpected WebSocket data:", data);
         }
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
       }
     };
-    
-    
 
     newSocket.onclose = () => {
       console.log("WebSocket closed, attempting to reconnect...");
       setTimeout(() => {
         setSocket(null); // เคลียร์ state
-      }, 3000); // รอ 3 วิ แล้วให้ useEffect รันใหม่
+      }, 3000);
     };
 
     return () => {
@@ -68,6 +64,7 @@ const Booking_Management = () => {
             q.id === id ? { ...q, status: "In_progress" } : q
           )
         );
+        
         if (socket) {
           socket.send(JSON.stringify({ action: "fetch_queue" })); // ขอข้อมูลคิวใหม่
         }
@@ -80,27 +77,49 @@ const Booking_Management = () => {
         console.log("Queue completed:", data);
         // ลบคิวออกจาก state และย้ายไปที่ประวัติการให้บริการ
         setQueue((prevQueue) => prevQueue.filter(q => q.id !== id));
+
+
+        if (socket) {
+          socket.send(JSON.stringify({ action: "fetch_queue" })); // ดึงคิวใหม่หลังจากเสร็จสิ้น
+        }
       });
   };
   
   const handleDeleteQueue = (id) => {
+    // เริ่มต้นด้วยการลบคิวจาก state ก่อนที่จะส่งคำขอลบ
+    setQueue((prevQueue) => prevQueue.filter((q) => q.id !== id));
+  
+    // ลบคิวจาก backend
     fetch(`${apiUrl}/bookings/${id}/delete/`, { method: "DELETE" })
       .then((response) => response.json())
       .then((data) => {
         console.log("Queue deleted:", data);
   
-        setQueue((prevQueue) => prevQueue.filter((q) => q.id !== id));
+        // ดึงข้อมูลคิวใหม่หลังจากลบ
+        fetch(`${apiUrl}/bookings/queue/`)
+          .then((res) => res.json())
+          .then((newQueue) => {
+            setQueue(newQueue); // อัปเดตข้อมูลคิวใหม่
+          });
   
         // ส่งคำขอให้ WebSocket อัปเดตข้อมูลคิว
         if (socket) {
           socket.send(JSON.stringify({ action: "fetch_queue" })); // ดึงคิวใหม่หลังจากลบ
         }
-        
+      })
+      .catch((error) => {
+        console.error("Error deleting queue:", error);
+        // ถ้ามีข้อผิดพลาดในการลบ ให้คืนค่าข้อมูลคิวเดิม
+        setQueue((prevQueue) => [...prevQueue]); // คืนค่าข้อมูลคิวเดิม
       });
   };
   
-
   
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString(); // จะได้วันที่และเวลาในรูปแบบที่เหมาะสมกับภาษาในระบบ
+  };
   return (
     <div >
         <Layout>
@@ -114,42 +133,7 @@ const Booking_Management = () => {
           <hr className='bg-black border-black text-black border-2 px-2' />
         </header>
         <div className="max-w-full mx-auto bg-white shadow-md rounded-lg p-4">
-{/*           
-              <>
-              
-              <div className='flex items-start'>
-                  <div
-                      
-                      className="flex justify-between items-center bg-black w-full  p-1 mb-2 rounded-l-full rounded-br-[1200rem] shadow-sm"
-                      >
-                          <div  className="flex items-center">
-                            <div className="flex items-center">
-                                <img src="/src/img/14.jpg" alt="User" className="rounded-full w-32 h-32 object-cover"/>
-                            </div>
-                            <div>
-                                <p className="text-white font-medium p-3">Name : <a>Touch Naahee</a></p>
-                                <p className="text-white font-medium p-3">Service : <a>Spa</a></p>
-                            </div>
-                            <div>
-                                <p className="text-white font-medium p-3">Time : <a>10 : 30 AM.</a></p>
-                                <p className="text-white font-medium p-3">Barber : <a>ARCHIE WILLIAMS</a></p>
-                            </div>
-                          </div>
-                      </div> 
-                        <div className="flex space-x-3 h-full md:ml-16 ml-8 pt-0 items-start justify-between whitespace-nowrap text-center">
-                            <p className="md:px-12 px-5  w-full h-full py-4 bg-white text-[#00BA9A] text-sm rounded-md border border-[#00BA9A] select-none">
-                               In progress
-                            </p>
-                            <button className="md:px-14 px-5  w-full h-full py-4 bg-[#00BA9A] text-white text-sm rounded-md hover:bg-[#00A085]">
-                                complete
-                            </button>
-                            <button className="md:px-14 px-5 w-full h-full py-4  bg-red-500 text-white text-sm rounded-md hover:bg-red-600">
-                              Delete
-                            </button>
-                        </div>
-                  </div>
-              </> */}
-              
+          
               <div className="space-y-4">
   {Array.isArray(queue) && queue.length > 0 ? (
     queue.map((q) => (
@@ -168,7 +152,15 @@ const Booking_Management = () => {
 
         {/* รายละเอียดลูกค้า */}
         <div className="flex flex-col text-white font-medium px-4">
-        <p>
+          <p>
+            คิวที่: {q.queue_number !== undefined && q.queue_number !== null 
+              ? q.queue_number 
+              : (q.queue_position || "ไม่ระบุ")}
+          </p>
+
+
+
+          <p>
             ลูกค้า: {typeof q.customer === "string" 
               ? q.customer 
               : `${q.customer.first_name} ${q.customer.last_name}`}
@@ -183,6 +175,17 @@ const Booking_Management = () => {
             บริการ: {typeof q.service === "string" 
               ? q.service 
               : `${q.service.name}`}
+          </p>
+
+          <p>
+            เวลาเริ่ม: {typeof q.end_time === "string" 
+              ? formatDate(q.start_time) 
+              : `${formatDate(q.start_time) } `}
+          </p>
+          <p>
+            เวลาเสร็จ: {typeof q.end_time === "string" 
+              ? formatDate(q.end_time) 
+              : `${formatDate(q.end_time)}`}
           </p>
 
           
