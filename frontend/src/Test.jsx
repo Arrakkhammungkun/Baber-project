@@ -117,7 +117,9 @@ const Bookingbarber = () => {
       <p>วันนี้: {summary.revenue_day}</p>
       <p>เดือนนี้: {summary.revenue_month}</p>
       <p>ปีนี้: {summary.revenue_year}</p>
-    </div>
+      
+
+      </div>
   );
 };
 
