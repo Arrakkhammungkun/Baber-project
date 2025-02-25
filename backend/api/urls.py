@@ -25,10 +25,13 @@ urlpatterns = [
     path('bookings/<str:employee_id>/<str:date>/', get_booked_times, name='get_booked_times'),
     path('bookings/queue/', get_booking_queue, name='get_booking_queue'),
     path('dashboard/summary/', DashboardSummaryAPIView.as_view(), name='dashboard-summary'),
+    path('revenue/', DashboardSummaryAPIView.as_view(), name='get_revenue'),
     path('revenue/last-7-days/', DashboardSummaryAPIView.as_view(), name='revenue-last-7-days'),
     path('revenue/last-month/', DashboardSummaryAPIView.as_view(), name='revenue-last-month'),
     path('revenue/last-3-months/', DashboardSummaryAPIView.as_view(), name='revenue-last-3-months'),
-    path('revenue/', DashboardSummaryAPIView.as_view(), name='get_revenue_in_period'),
+
+    # path('revenue/', DashboardSummaryAPIView.as_view(), name='get_revenue_in_period'),
+
     path('revenue/current-day', DashboardSummaryAPIView.as_view(), name='get_revenue_current_day'),
     path('revenue/current_month', DashboardSummaryAPIView.as_view(), name='get_revenue_current_month'),
 

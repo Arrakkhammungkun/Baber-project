@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from .models import Booking, Employee, Member,Service,DashboardSummary,update_dashboard_summary 
-from .serializers import BookingSerializer, EmployeeSerializer, MemberSerializers,ServiceSerializer,DashboardSummarySerializer
+from .models import Booking, Employee, Member,Service,DashboardSummary,update_dashboard_summary,update_top_services
+from .serializers import TopServiceSerializer,BookingSerializer, EmployeeSerializer, MemberSerializers,ServiceSerializer,DashboardSummarySerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -23,6 +23,10 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.db import models
+from mongoengine import Q
+from django.db.models import Count
+
 @api_view(['GET'])
 def example_view(request):
     data = {"message": "Hello, this is an API response! 55555555555"}
@@ -298,9 +302,6 @@ def create_booking(request):
                 # แปลง booking_date เป็น datetime object
                 booking_date = datetime.strptime(booking_date_str, "%Y-%m-%d") 
 
-                print(f"Booking date: {booking_date}, Status: {booking_status}")
-                print(f"Received booking_date: {booking_date} (type: {type(booking_date)})")
-
                 # เรียกใช้ฟังก์ชัน update_dashboard_summary
                 update_dashboard_summary(booking_date, booking_status)
 
@@ -330,7 +331,7 @@ def confirm_booking(request, booking_id):
 
         booking_date = booking.date
         status = booking.status
-        print(f"Booking date: {booking_date}, Status: {status}")
+
         # เรียกใช้ update_dashboard_summary และส่งอาร์กิวเมนต์ที่จำเป็น
         update_dashboard_summary(booking_date, status)
 
@@ -359,7 +360,6 @@ def complete_booking(request, booking_id):
         # เปลี่ยนจาก booking.booking_date เป็น booking.date (หรือใช้ชื่อ field ที่ถูกต้อง)
         booking_date = booking.date  
         status = 'completed' 
-        print(f"Booking date: {booking_date}, Status: {status}")
         service = booking.service  # ดึงข้อมูล Service ที่เชื่อมโยงกับ Booking
 
         price = service.price if service else 0  # ดึงราคา จาก Service (ถ้ามี)
@@ -373,7 +373,7 @@ def complete_booking(request, booking_id):
             summary.save()
 
         update_dashboard_summary(booking_date, status)
-
+        update_top_services(booking_date)
         booking.delete()
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
@@ -389,15 +389,20 @@ def complete_booking(request, booking_id):
 def delete_booking(request, booking_id):
     try:
         booking = Booking.objects.get(id=booking_id)
-        booking.delete()
+        booking.status = "cancelled"
+        booking.save()
 
-       
+        booking_date = booking.date
+        update_dashboard_summary(booking_date, "cancelled")  # อัปเดต cancelled_count
+        update_top_services(booking_date)  # อัปเดต top_services (ไม่นับ cancelled)
+        booking.delete()
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
-            "queue_updates", {"type": "delete_queue", "booking_id": booking_id}
+            "queue_updates", 
+            {"type": "delete_queue", "booking_id": booking_id}
         )
 
-        return Response({"message": "คิวถูกลบแล้ว"})
+        return Response({"message": "คิวถูกยกเลิกแล้ว"})
     except Booking.DoesNotExist:
         return Response({"error": "ไม่พบคิวนี้"}, status=404)
 
@@ -516,20 +521,115 @@ def get_booking_queue(request):
 
 class DashboardSummaryAPIView(APIView):
     def get(self, request):
-        
-        summary = DashboardSummary.objects.order_by('-summary_date').first()
-        if not summary:
-            return Response({"message": "No dashboard summary available"}, status=status.HTTP_404_NOT_FOUND)
-        
-        serializer = DashboardSummarySerializer(summary)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    def get_revenue_in_period(self, start_date, end_date):
-        """คำนวณรายได้รวมในช่วงเวลาที่กำหนด"""
-        summaries = DashboardSummary.objects.filter(summary_date__gte=start_date, summary_date__lte=end_date)
-        total_revenue = 0
+        period = request.query_params.get("period", "today")
+        start_date_param = request.query_params.get("start_date")
+        end_date_param = request.query_params.get("end_date")
+
+        if start_date_param and end_date_param:
+            try:
+                if start_date_param.lower() == "today":
+                    start_date = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                else:
+                    start_date = datetime.strptime(start_date_param, "%Y-%m-%d")
+                end_date = datetime.strptime(end_date_param, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+                label = f"Custom: {start_date_param} to {end_date_param}"
+            except ValueError:
+                return Response({"error": "Invalid date format. Use YYYY-MM-DD or 'today'"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            end_date = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            if period == "today":
+                start_date = end_date
+                label = "Today"
+            elif period == "last-7-days":
+                start_date = end_date - timedelta(days=6)
+                label = "Last 7 Days"
+            elif period == "last-month":
+                start_date = end_date - timedelta(days=30)
+                label = "Last 1 Month"
+            elif period == "last-3-months":
+                start_date = end_date - timedelta(days=90)
+                label = "Last 3 Months"
+            else:
+                return Response({"error": "Invalid period"}, status=status.HTTP_400_BAD_REQUEST)
+
+        print(f"Query range: {start_date} to {end_date}")  # Debug
+        summaries = DashboardSummary.objects.filter(
+            summary_date__gte=start_date,
+            summary_date__lte=end_date
+        ).order_by('-summary_date')
+
+        print(f"Summaries count: {summaries.count()}")  # Debug
+        print(f"Dates: {[s.summary_date for s in summaries]}")  # Debug
+
+        if not summaries:
+            return Response({"message": f"No data available for {label}"}, status=status.HTTP_404_NOT_FOUND)
+
+        month_start = end_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        year_start = end_date.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        month_summaries = DashboardSummary.objects.filter(
+            summary_date__gte=month_start,
+            summary_date__lte=end_date
+        )
+        year_summaries = DashboardSummary.objects.filter(
+            summary_date__gte=year_start,
+            summary_date__lte=end_date
+        )
+
+        aggregated_data = {
+            "bookings_today": sum(s.bookings_today for s in summaries) if summaries else 0,
+            "served_customers": sum(s.served_customers for s in summaries) if summaries else 0,
+            "in_progress_count": sum(s.in_progress_count for s in summaries) if summaries else 0,
+            "cancelled_count": sum(s.cancelled_count for s in summaries) if summaries else 0,  # เพิ่มการรวม cancelled_count
+            "revenue_day": sum(s.revenue_day for s in summaries) if summaries else 0,
+            "revenue_month": sum(s.revenue_day for s in month_summaries),
+            "revenue_year": sum(s.revenue_day for s in year_summaries),
+            "top_services": [],
+            "summary_date": end_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "period": label,
+            "updated_at": summaries[0].updated_at.strftime("%Y-%m-%dT%H:%M:%SZ") if summaries else timezone.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+        }
+
+        top_services_dict = {}
         for summary in summaries:
-            total_revenue += summary.revenue_day
-        return total_revenue
+            for top_service in summary.top_services or []:
+                service_name_or_id = top_service.service_name
+                try:
+                    if len(service_name_or_id) == 24 and all(c in '0123456789abcdefABCDEF' for c in service_name_or_id):
+                        service = Service.objects(id=service_name_or_id).first()
+                        service_name = service.name if service else "Unknown Service"
+                    else:
+                        service_name = service_name_or_id
+                except ValueError:
+                    service_name = service_name_or_id
+
+                top_services_dict[service_name] = top_services_dict.get(service_name, 0) + top_service.booking_count
+
+        aggregated_data["top_services"] = [
+            {"service_name": name, "booking_count": count}
+            for name, count in sorted(top_services_dict.items(), key=lambda x: x[1], reverse=True)[:5]
+        ]
+
+        serializer = DashboardSummarySerializer(aggregated_data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def get_top_services_in_period(self, start_date, end_date):
+        # ใช้ Aggregation Framework แทนการใช้ annotate
+        pipeline = [
+            {"$match": {"date": {"$gte": start_date, "$lt": end_date}}},  # เงื่อนไขการเลือกช่วงเวลาจอง
+            {"$group": {"_id": "$service", "num_bookings": {"$sum": 1}}},  # รวมจำนวนการจองตามบริการ
+            {"$sort": {"num_bookings": -1}},  # เรียงจากมากไปน้อย
+            {"$limit": 5}  # เลือก 5 บริการที่มีการจองมากที่สุด
+        ]
+        
+        top_services = list(Booking.objects.aggregate(pipeline))  # ดึงข้อมูลจาก MongoDB
+        
+        # แปลงข้อมูลจาก aggregation ให้เป็นบริการที่มีชื่อ
+        for service in top_services:
+            service_obj = Service.objects(id=service['_id']).first()  # หา Service โดยใช้ id
+            service['service_name'] = service_obj.name if service_obj else 'Unknown Service'
+        
+        return top_services
+
     
     def get_revenue_current_day(self, request):
         """ดูรายได้ในวันปัจจุบัน"""

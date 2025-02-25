@@ -156,13 +156,20 @@ class BookingSerializer(serializers.Serializer):
         booking.save()
         return booking
 
+class TopServiceSerializer(serializers.Serializer):
+    service_name = serializers.CharField()  # ชื่อบริการ
+    booking_count = serializers.IntegerField()  # จำนวนการจอง
+
 
 class DashboardSummarySerializer(serializers.Serializer):
     summary_date = serializers.DateTimeField()
     bookings_today = serializers.IntegerField()
     served_customers = serializers.IntegerField()
     in_progress_count = serializers.IntegerField()
+    cancelled_count = serializers.IntegerField()
     revenue_day = serializers.IntegerField()
     revenue_month = serializers.IntegerField()
     revenue_year = serializers.IntegerField()
+    top_services = TopServiceSerializer(many=True) 
     updated_at = serializers.DateTimeField()
+    period = serializers.CharField()
