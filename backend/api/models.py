@@ -1,6 +1,6 @@
 from django.forms import DateField
-from mongoengine import Document, StringField, EmailField, BooleanField, IntField,DateTimeField,FileField,ListField, ReferenceField
-from mongoengine import connect,DoesNotExist
+from mongoengine import Document, StringField, EmailField, BooleanField, IntField,DateTimeField,FileField,ListField, ReferenceField,EmbeddedDocumentField,EmbeddedDocument
+from mongoengine import connect,DoesNotExist,Q
 from django.contrib.auth.hashers import make_password, check_password
 from datetime import datetime, timedelta
 
@@ -95,7 +95,12 @@ class Booking(Document):
 
         self.end_time = self.start_time + timedelta(minutes=self.service.duration)  # คำนวณเวลาสิ้นสุด
         return super(Booking, self).save(*args, **kwargs)
+
+class TopService(EmbeddedDocument):
+    service_name = StringField(required=True)
+    booking_count = IntField(default=0)
     
+
 class DashboardSummary(Document):
     # วันที่สรุป (อาจใช้เป็นวันที่ของข้อมูล)
     summary_date = DateTimeField()  # ใช้ DateTimeField ของ mongoengine
@@ -106,55 +111,99 @@ class DashboardSummary(Document):
     served_customers = IntField(default=0)
     # คิวที่กำลังดำเนินการ (status = "In_progress")
     in_progress_count = IntField(default=0)
+    cancelled_count = IntField(default=0)
     # รายได้รวมของวัน
     revenue_day = IntField(default=0)
     # รายได้รวมของเดือน
     revenue_month = IntField(default=0)
     # รายได้รวมของปี
     revenue_year = IntField(default=0)
-            
+    top_services = ListField(EmbeddedDocumentField(TopService))        
     # เวลาที่อัปเดตล่าสุด
     updated_at = DateTimeField(default=datetime.utcnow)
     
     def __str__(self):
         return f"Dashboard Summary for {self.summary_date.strftime('%Y-%m-%d')}"
-    
-def update_dashboard_summary( booking_date, status):
-    """ อัปเดต Dashboard Summary ตามสถานะการจอง """
-    today = booking_date.date()  # ดึงวันที่จากการจอง
-    print(f"Updating summary for {today} with status: {status}")  # log status และ date สำหรับตรวจสอบ
 
-    # ค้นหาข้อมูลใน DashboardSummary ตามวันที่
-    summary = DashboardSummary.objects.filter(summary_date=today).first()
+def update_top_services(booking_date):
+    """ คำนวณ 5 อันดับบริการที่ถูกจองมากที่สุดในวันนั้น """
+    today = booking_date.date()
+    start_date = datetime.combine(today, datetime.min.time())
+    end_date = start_date + timedelta(days=1)
 
+    pipeline = [
+        {"$match": {"date": {"$gte": start_date, "$lt": end_date}}},
+        {"$group": {"_id": "$service", "booking_count": {"$sum": 1}}},
+        {"$sort": {"booking_count": -1}},
+        {"$limit": 5}
+    ]
+    top_services_data = list(Booking.objects.aggregate(pipeline))
+
+    # ดึง DashboardSummary ของวันนั้น
+    summary = DashboardSummary.objects(summary_date=start_date).first()
     if not summary:
-        # ถ้าไม่มีข้อมูลสรุปของวันที่นี้ให้สร้างใหม่
+        summary = DashboardSummary(summary_date=start_date)
+
+    # อัปเดตข้อมูลโดยไม่ลบรายการที่มีอยู่
+    existing_services = {s.service_name: s for s in summary.top_services}
+
+    for service in top_services_data:
+        service_id = str(service["_id"])  # เอา ID ของ Service
+        booking_count = service["booking_count"]
+
+        # ดึงชื่อบริการจาก ID
+        service_obj = Service.objects(id=service_id).first()
+        if service_obj:
+            service_name = service_obj.name
+        else:
+            service_name = "Unknown Service"
+
+        # อัปเดตหรือเพิ่มบริการใหม่
+        if service_name in existing_services:
+            existing_services[service_name].booking_count += booking_count
+        else:
+            summary.top_services.append(TopService(service_name=service_name, booking_count=booking_count))
+
+    summary.updated_at = datetime.utcnow()
+    summary.save()
+
+
+
+
+def update_dashboard_summary(booking_date, status):
+    today = booking_date.date()
+    print(f"Updating summary for {today} with status: {status}")
+
+    summary = DashboardSummary.objects.filter(summary_date=today).first()
+    if not summary:
         summary = DashboardSummary.objects.create(
             summary_date=today,
             bookings_today=0,
             served_customers=0,
             in_progress_count=0,
+            cancelled_count=0,  # ค่าเริ่มต้น
             revenue_day=0,
             revenue_month=0,
             revenue_year=0,
             updated_at=booking_date
         )
 
-    # ตรวจสอบสถานะของการจองและอัปเดตค่าต่างๆ
     if status == 'create':
-        summary.bookings_today += 1  # เพิ่มจำนวนการจองวันนี้
-        print(f"Bookings today increased: {summary.bookings_today}")  # log เพิ่มการจอง
+        summary.bookings_today += 1
+        print(f"Bookings today increased: {summary.bookings_today}")
     elif status == 'cancelled':
-        summary.bookings_today -= 1  # ลดจำนวนการจองวันนี้
-        summary.in_progress_count -= 1  # ลดจำนวนคิวที่กำลังดำเนินการ
-        print(f"Booking cancelled, bookings today: {summary.bookings_today}, in progress: {summary.in_progress_count}")
+        summary.bookings_today -= 1  # ลดจำนวนการจอง
+        summary.cancelled_count += 1  # เพิ่มจำนวนการยกเลิก
+        if summary.in_progress_count > 0:  # ลด in_progress ถ้ามี
+            summary.in_progress_count -= 1
+        print(f"Booking cancelled, bookings today: {summary.bookings_today}, cancelled: {summary.cancelled_count}")
     elif status == 'In_progress':
-        summary.in_progress_count += 1  # เพิ่มจำนวนคิวที่กำลังดำเนินการ
+        summary.in_progress_count += 1
         print(f"In progress, in progress count: {summary.in_progress_count}")
     elif status == 'completed':
         summary.in_progress_count -= 1
-        summary.served_customers += 1  # เพิ่มจำนวนลูกค้าที่รับบริการแล้ว
+        summary.served_customers += 1
         print(f"Booking confirmed, served customers: {summary.served_customers}")
 
-    summary.save()  # บันทึกการเปลี่ยนแปลงใน Dashboard Summary
-    print("Summary updated successfully.")  # log การอัปเดตเสร็จสิ้น
+    summary.save()
+    print("Summary updated successfully.")
