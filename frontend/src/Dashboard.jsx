@@ -1,12 +1,8 @@
 import { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
-<<<<<<< Updated upstream
-import Layout from './components/Layout';
+import LayoutAdmin from './components/LayoutAdmin';
 import axios from 'axios';
 const apiUrl = import.meta.env.VITE_API_URL;
-=======
-import LayoutAdmin from './components/LayoutAdmin';
->>>>>>> Stashed changes
 
 const Dashboard = () => {
   const [selectedTime, setSelectedTime] = useState("Today");
@@ -207,15 +203,8 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-<<<<<<< Updated upstream
       <div className="py-20"></div>
-    </Layout>
-=======
-      
     </LayoutAdmin>
-
-    
->>>>>>> Stashed changes
   );
 };
 
