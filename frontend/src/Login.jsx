@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 const apiUrl =import.meta.env.VITE_API_URL;
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -86,7 +87,6 @@ const Login = () => {
         <h2 className="text-center text-3xl text-white font-bold mb-6">Login</h2>
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="mb-4 shadow-md shadow-gray-800 rounded-md">
-            
             <input
               type="email"
               id="email"
@@ -135,18 +135,12 @@ const Login = () => {
               Continue with Google
             </button>
           </div>
-          <div className='flex'>
-            <button
-              type="submit"
-              className=" w-full py-2 px-12 bg-white text-black font-bold  rounded-3xl hover:bg-black hover:text-white "
-            > 
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="w-6 h-6 inline-block mr-2 fill-current"><path d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"/></svg>
-              Continue with facebook
-            </button>
-          </div>
+
           <div className='flex justify-start'>
             <a className='text-white mr-1'>New User?</a>
+            <Link to="/register">
             <a className='text-[#4595ED] hover:underline' href='#'>Create an account</a>
+            </Link>
           </div>
           
 

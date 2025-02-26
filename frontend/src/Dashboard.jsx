@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
+<<<<<<< Updated upstream
 import Layout from './components/Layout';
 import axios from 'axios';
 const apiUrl = import.meta.env.VITE_API_URL;
+=======
+import LayoutAdmin from './components/LayoutAdmin';
+>>>>>>> Stashed changes
 
 const Dashboard = () => {
   const [selectedTime, setSelectedTime] = useState("Today");
@@ -117,7 +121,7 @@ const Dashboard = () => {
   if (!summary) return <div>Loading...</div>;
 
   return (
-    <Layout>
+    <LayoutAdmin>
       <div className="container mt-24 mx-auto">
         <div className="flex-1 ml-0">
           <header className="mb-2 text-start">
@@ -203,8 +207,15 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+<<<<<<< Updated upstream
       <div className="py-20"></div>
     </Layout>
+=======
+      
+    </LayoutAdmin>
+
+    
+>>>>>>> Stashed changes
   );
 };
 

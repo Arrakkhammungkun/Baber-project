@@ -24,6 +24,7 @@ import Test_service from './Test_servie.jsx';
 import Managment from './Managment.jsx';
 import Dashboard from './Dashboard.jsx';
 import Queue from './Queue.jsx';
+import CircularGallery from './CircularGallery.jsx';
 
 // import ProtectedRoute from './components/ProtectedRoute.jsx';
 
@@ -107,6 +108,11 @@ const router = createBrowserRouter([
     
     path: '/queue', 
     element: <Queue />,
+  },
+  {
+    
+    path: '/gallery', 
+    element: <CircularGallery />,
   },
 
   
