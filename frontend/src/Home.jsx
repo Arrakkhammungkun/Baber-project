@@ -81,7 +81,7 @@ function Home() {
           </div>
 
           {/* Section with content below */}
-          <div className="container mx-auto py-4">
+          <div className="container mx-auto py-4 mt-10">
             <div>
               <h1 className={`text-center  text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-extrabold `}>
               STYLEX
@@ -159,15 +159,18 @@ function Home() {
                   <h1 className='text-sm sm:text-xs md:text-sm lg:text-sm xl:text-base font-bold'>สร้างสไตล์ที่ใช่ พร้อมดูแลเส้นผมให้สุขภาพดี</h1>
                 </div>
               </div>
+              
 
             </div>
-
+            <div className='text-white text-[12px] sm:text-xs md:text-sm lg:text-base xl:text-xl mt-2 text-center flex justify-end md:mx-5'>
+              <button className='w-auto bg-white text-black border-2 border-black p-2 hover:bg-black hover:text-white transition ease-in-out duration-300 rounded-sm'>book now</button>
+            </div>
             <div className="mb-10">
               <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold uppercase">
                 all gallery
               </h1>
             </div>
-            <div className="w-full gallery-container mb-10">
+            <div className="w-full gallery-container mb-10 ">
               <div className="slider">
                 <div className="slider-track">
                   {items.concat(items).map((item, index) => (

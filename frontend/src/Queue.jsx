@@ -7,6 +7,7 @@ import Layout from "./components/Layout";
 const Queue = () => {
   const [setQueue] = useState([]);
   const [position, setPosition] = useState(null);
+  
 
   useEffect(() => {
     const newSocket = new WebSocket(`${URLSOCKET}/ws/queue/`);
