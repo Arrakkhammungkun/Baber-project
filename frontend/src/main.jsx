@@ -23,6 +23,8 @@ import AdminQueueStatus from './AdminQueueStatus.jsx';
 import Test_service from './Test_servie.jsx';
 import Managment from './Managment.jsx';
 import Dashboard from './Dashboard.jsx';
+import Profile from './Profile.jsx';
+
 
 // import ProtectedRoute from './components/ProtectedRoute.jsx';
 
@@ -102,6 +104,13 @@ const router = createBrowserRouter([
     path: '/admin/dashboard', 
     element: <Dashboard />,
   },
+  {
+    
+    path: '/profile', 
+    element: <Profile />,
+  },
+  
+
 
   
 
