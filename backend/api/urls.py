@@ -29,8 +29,8 @@ urlpatterns = [
     path('revenue/last-7-days/', DashboardSummaryAPIView.as_view(), name='revenue-last-7-days'),
     path('revenue/last-month/', DashboardSummaryAPIView.as_view(), name='revenue-last-month'),
     path('revenue/last-3-months/', DashboardSummaryAPIView.as_view(), name='revenue-last-3-months'),
-
     # path('revenue/', DashboardSummaryAPIView.as_view(), name='get_revenue_in_period'),
+    path('update-name/', views.update_name, name='update-name'),
 
     path('revenue/current-day', DashboardSummaryAPIView.as_view(), name='get_revenue_current_day'),
     path('revenue/current_month', DashboardSummaryAPIView.as_view(), name='get_revenue_current_month'),

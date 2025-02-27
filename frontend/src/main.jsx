@@ -5,6 +5,7 @@ import App from './App.jsx';
 import {
   createBrowserRouter,
   RouterProvider,
+  useMatch,
 } from "react-router-dom";
 import Home from './Home.jsx';
 import Register from './Register.jsx';
@@ -28,6 +29,7 @@ import Queue from './Queue.jsx';
 import CircularGallery from './CircularGallery.jsx';
 import Profile from './Profile.jsx';
 
+import ProfilePage from './Profile.jsx';
 // import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 const router = createBrowserRouter([

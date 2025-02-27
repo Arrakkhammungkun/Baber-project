@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from django.contrib.auth.hashers import check_password
 import jwt
-import datetime
+#import datetime
 from django.conf import settings
 import os
 from django.http import JsonResponse
@@ -26,7 +26,10 @@ from django.utils import timezone
 from django.db import models
 from mongoengine import Q
 from django.db.models import Count
-
+from .consumers import QueueConsumer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import AllowAny  # เพิ่มเพื่อให้ public
 @api_view(['GET'])
 def example_view(request):
     data = {"message": "Hello, this is an API response! 55555555555"}
@@ -51,6 +54,7 @@ class RegisterAPIView(APIView):
         return Response({"message": "Validation failed", "errors": detailed_errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginAPIView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
@@ -68,7 +72,8 @@ class LoginAPIView(APIView):
                     'email':member.email,
                     'phone_number':member.phone_number,
                     'profile_image':member.profile_image,
-                    'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
+                    'exp': datetime.utcnow() + timedelta(days=1),
+
                     
                 }
                 token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
@@ -142,6 +147,7 @@ def allowed_file(filename):
 
 
 @api_view(['POST'])
+
 def upload_profile(request):
     if 'profile_image' not in request.FILES:
         return JsonResponse({"error": "No file part"}, status=400)
@@ -174,6 +180,39 @@ def upload_profile(request):
 
     return JsonResponse({"message": "File uploaded successfully", "path": member.profile_image}, status=200)
 
+@api_view(['PUT'])
+@permission_classes([])
+def update_name(request):
+    print("Update Name Headers:", request.headers)
+    try:
+        token = request.headers.get("Authorization").split(" ")[1]
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        member = Member.objects.get(id=payload['user_id'])
+        first_name = request.data.get('first_name')
+        last_name = request.data.get('last_name')
+
+        if not first_name or not last_name:
+            return Response({"message": "First name and last name are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        member.first_name = first_name
+        member.last_name = last_name
+        member.save()
+
+        return Response({
+            "message": "Name updated successfully",
+            "data": {
+                "user_id": str(member.id),
+                "first_name": member.first_name,
+                "last_name": member.last_name,
+                "nick_name": member.nick_name,
+                "email": member.email,
+                "phone_number": member.phone_number,
+                "profile_image": member.profile_image
+            }
+        }, status=status.HTTP_200_OK)
+    except Member.DoesNotExist:
+        return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    
 
 class ServiceListView(APIView):
     def get(self, request):
@@ -308,13 +347,16 @@ def create_booking(request):
                 
                 # ส่งข้อมูลไปยัง WebSocket
                 channel_layer = get_channel_layer()
+                queue_consumer = QueueConsumer()
+                queue_data = queue_consumer.get_queue_data_sync()  # ใช้ฟังก์ชัน sync
                 async_to_sync(channel_layer.group_send)(
                     "queue_updates",
                     {
                         "type": "send_queue_update",
-                        "data": BookingSerializer(booking).data,
-                    },
+                        "data": queue_data
+                    }
                 )
+                print("Sending update to WebSocket:", queue_data)
 
                 return Response({"message": "Booking created successfully"}, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -335,16 +377,17 @@ def confirm_booking(request, booking_id):
         # เรียกใช้ update_dashboard_summary และส่งอาร์กิวเมนต์ที่จำเป็น
         update_dashboard_summary(booking_date, status)
 
-        # ส่งข้อมูลไปยัง WebSocket เพื่ออัปเดตสถานะคิว
         channel_layer = get_channel_layer()
+        queue_consumer = QueueConsumer()
+        queue_data = queue_consumer.get_queue_data_sync()  # อัพเดทข้อมูลคิวทั้งหมด
         async_to_sync(channel_layer.group_send)(
-            "queue_updates", 
+            "queue_updates",
             {
                 "type": "send_queue_update",
-                "data": BookingSerializer(booking).data
+                "data": queue_data
             }
         )
-
+        print("Sending update to WebSocket:", queue_data)
         return Response({"message": "Booking In_progress successfully"})
     except Booking.DoesNotExist:
         return Response({"error": "Booking not found"}, status=404)
@@ -376,9 +419,16 @@ def complete_booking(request, booking_id):
         update_top_services(booking_date)
         booking.delete()
         channel_layer = get_channel_layer()
+        queue_consumer = QueueConsumer()
+        queue_data = queue_consumer.get_queue_data_sync()
         async_to_sync(channel_layer.group_send)(
-            "queue_updates", {"type": "delete_queue", "booking_id": booking_id}
+            "queue_updates",
+            {
+                "type": "send_queue_update",
+                "data": queue_data
+            }
         )
+        print("Sending update to WebSocket:", queue_data)
 
         return Response({"message": "คิวเสร็จสิ้นแล้ว"})
     except Booking.DoesNotExist:
@@ -396,11 +446,18 @@ def delete_booking(request, booking_id):
         update_dashboard_summary(booking_date, "cancelled")  # อัปเดต cancelled_count
         update_top_services(booking_date)  # อัปเดต top_services (ไม่นับ cancelled)
         booking.delete()
+        
         channel_layer = get_channel_layer()
+        queue_consumer = QueueConsumer()
+        queue_data = queue_consumer.get_queue_data_sync()  # ใช้ฟังก์ชัน sync
         async_to_sync(channel_layer.group_send)(
-            "queue_updates", 
-            {"type": "delete_queue", "booking_id": booking_id}
+            "queue_updates",
+            {
+                "type": "send_queue_update",
+                "data": queue_data
+            }
         )
+        print("Sending update to WebSocket:", queue_data)
 
         return Response({"message": "คิวถูกยกเลิกแล้ว"})
     except Booking.DoesNotExist:
