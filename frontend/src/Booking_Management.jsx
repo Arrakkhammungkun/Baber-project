@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 const URLSOCKET = import.meta.env.VITE_API_URLSOCKET;
 const apiUrl = import.meta.env.VITE_API_URL;
-import Layout from './components/Layout';
-const apiUrl_img = import.meta.env.VITE_API_IMG;
 
+const apiUrl_img = import.meta.env.VITE_API_IMG;
+import LayoutAdmin from './components/LayoutAdmin';
 const Booking_Management = () => {
   const [queue, setQueue] = useState([]);
   const [socket, setSocket] = useState(null);
@@ -91,7 +91,7 @@ const Booking_Management = () => {
 
   return (
     <div>
-      <Layout>
+      <LayoutAdmin>
         <div className='container mt-24 mx-auto'>
           <header className="mb-2 text-start">
             <h1 className="text-2xl font-bold text-gray-800 p-2 ml-20">BOOKING MANAGEMENT</h1>
@@ -188,7 +188,7 @@ const Booking_Management = () => {
           </div>
         </div>
         <div className='my-[20rem]'></div>
-      </Layout>
+      </LayoutAdmin>
     </div>
   );
 };

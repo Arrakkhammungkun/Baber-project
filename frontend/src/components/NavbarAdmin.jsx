@@ -9,13 +9,13 @@ const NavbarAdmin = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  const { user, token, logout } = useAuth();
+  const { user, adminToken, logoutAdmin } = useAuth();
  
   const [isMenuOpen, setIsMenuOpen] = useState(false);  // เพิ่มสถานะใหม่สำหรับ hamburger menu
 
 
   const handleLogout = () => {
-    logout();
+    logoutAdmin();
     
   };
   
@@ -55,20 +55,20 @@ const NavbarAdmin = () => {
 
         {/* Navigation Links (For desktop) */}
         <div className="hidden md:flex absolute left-1/2 transform -translate-x-1/2 space-x-6">
-          <a href="/" className="hover:text-gray-300">
+          <a href="/admin/dashboard" className="hover:text-gray-300">
           Dashboard
           </a>
-          <a href="/test_service" className="hover:text-gray-300">
+          <a href="/admin/manage" className="hover:text-gray-300">
           Managment
           </a>
-          <a href="/about" className="hover:text-gray-300">
+          <a href="/admin/manage/bookings" className="hover:text-gray-300">
           Booking Management
           </a>
-          <a href="/contact" className="hover:text-gray-300">
-          EditService
+          <a href="/admin/addservices" className="hover:text-gray-300">
+          ManagmentService
           </a>
-          <a href="/contact" className="hover:text-gray-300">
-          Add_Service
+          <a href="/admin/manage/employees" className="hover:text-gray-300">
+          ManagmentEmployee
           </a>
         </div>
 
@@ -76,7 +76,7 @@ const NavbarAdmin = () => {
 
         {/* Right Side (Profile or Login/Register) */}
         <div className="relative">
-          {token ? (
+          {adminToken ? (
             <div className="flex items-center space-x-4">
               <div className="cursor-pointer" onClick={handleMenuToggle}>
                 {user && user.profile_image ? (
@@ -169,14 +169,14 @@ const NavbarAdmin = () => {
           EditService
           </a>
           {
-            token &&(
+            adminToken &&(
               <a onClick={handleLogout} className="text-black text-lg  px-4 py-2 rounded-md  bg-red-500 hover:bg-red-600">
               ออกจากระบบ
             </a>
             )
           }
 
-          {!token && (
+          {!adminToken && (
             <div className="flex flex-col items-center  space-y-4 mt-6">
               <Link
                 to="/login"

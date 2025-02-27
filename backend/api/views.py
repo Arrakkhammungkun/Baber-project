@@ -27,6 +27,9 @@ from django.db import models
 from mongoengine import Q
 from django.db.models import Count
 from .consumers import QueueConsumer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import AllowAny  # เพิ่มเพื่อให้ public
 @api_view(['GET'])
 def example_view(request):
     data = {"message": "Hello, this is an API response! 55555555555"}
@@ -51,6 +54,7 @@ class RegisterAPIView(APIView):
         return Response({"message": "Validation failed", "errors": detailed_errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginAPIView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
@@ -143,6 +147,7 @@ def allowed_file(filename):
 
 
 @api_view(['POST'])
+
 def upload_profile(request):
     if 'profile_image' not in request.FILES:
         return JsonResponse({"error": "No file part"}, status=400)
@@ -175,6 +180,39 @@ def upload_profile(request):
 
     return JsonResponse({"message": "File uploaded successfully", "path": member.profile_image}, status=200)
 
+@api_view(['PUT'])
+@permission_classes([])
+def update_name(request):
+    print("Update Name Headers:", request.headers)
+    try:
+        token = request.headers.get("Authorization").split(" ")[1]
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        member = Member.objects.get(id=payload['user_id'])
+        first_name = request.data.get('first_name')
+        last_name = request.data.get('last_name')
+
+        if not first_name or not last_name:
+            return Response({"message": "First name and last name are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        member.first_name = first_name
+        member.last_name = last_name
+        member.save()
+
+        return Response({
+            "message": "Name updated successfully",
+            "data": {
+                "user_id": str(member.id),
+                "first_name": member.first_name,
+                "last_name": member.last_name,
+                "nick_name": member.nick_name,
+                "email": member.email,
+                "phone_number": member.phone_number,
+                "profile_image": member.profile_image
+            }
+        }, status=status.HTTP_200_OK)
+    except Member.DoesNotExist:
+        return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+    
 
 class ServiceListView(APIView):
     def get(self, request):

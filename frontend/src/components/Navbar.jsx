@@ -152,7 +152,7 @@ const Navbar = () => {
 
         <div className="flex flex-col items-center space-y-6 mt-2 h-full bg-white min-h-min ">
 
-          <a href="/" className="text-black text-lg hover:text-gray-500">
+          <a href="/Profile" className="text-black text-lg hover:text-gray-500">
             บัญชี
           </a>
           <a href="/" className="text-black text-lg hover:text-gray-500">
@@ -164,8 +164,8 @@ const Navbar = () => {
           <a href="/about" className="text-black text-lg hover:text-gray-300">
             เกี่ยวกับเรา
           </a>
-          <a href="/contact" className="text-black text-lg hover:text-gray-300">
-            ติดต่อเรา
+          <a href="/login/admin" className="text-black text-lg hover:text-gray-300">
+           Admin Login
           </a>
           {
             token &&(

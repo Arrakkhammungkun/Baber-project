@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 const apiUrl = import.meta.env.VITE_API_URL;
-import Layout from "./components/Layout";
+
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
-
+import LayoutAdmin from './components/LayoutAdmin';
 const Managment = () => {
   const [services, setServices] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -102,7 +102,7 @@ const Managment = () => {
 
   return (
     <div>
-      <Layout>
+      <LayoutAdmin>
         <div className="container mt-24 mx-auto">
           <header className="mb-2 text-start">
             <h1 className="text-2xl font-bold text-gray-800 p-2 ml-20 uppercase">
@@ -220,7 +220,7 @@ const Managment = () => {
         <div className="py-20">
 
         </div>
-      </Layout>
+      </LayoutAdmin>
     </div>
   );
 };

@@ -5,6 +5,7 @@ import App from './App.jsx';
 import {
   createBrowserRouter,
   RouterProvider,
+  useMatch,
 } from "react-router-dom";
 import Home from './Home.jsx';
 import Register from './Register.jsx';
@@ -26,7 +27,7 @@ import Managment from './Managment.jsx';
 import Dashboard from './Dashboard.jsx';
 import Queue from './Queue.jsx';
 import CircularGallery from './CircularGallery.jsx';
-
+import ProfilePage from './Profile.jsx';
 // import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 const router = createBrowserRouter([
@@ -119,6 +120,11 @@ const router = createBrowserRouter([
     
     path: '/forgot_password', 
     element: <Forgot_password />,
+  },
+  {
+    
+    path: '/Profile', 
+    element: <ProfilePage />,
   },
 
   

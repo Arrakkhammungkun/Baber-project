@@ -40,7 +40,7 @@ const Login = () => {
         console.log('Login successful:', data);  
           
         
-        window.location.href = '/'; 
+        //window.location.href = '/'; 
         
       }
     } catch (err) {
