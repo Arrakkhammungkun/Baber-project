@@ -9,6 +9,7 @@ import {
 import Home from './Home.jsx';
 import Register from './Register.jsx';
 import Login from './Login.jsx';
+import Forgot_password from './Forgot_password.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import Login_admin from './Login_admin.jsx';
 import AddServiceForm from './components/AddServiceForm.jsx';
@@ -24,6 +25,7 @@ import Test_service from './Test_servie.jsx';
 import Managment from './Managment.jsx';
 import Dashboard from './Dashboard.jsx';
 import Queue from './Queue.jsx';
+import CircularGallery from './CircularGallery.jsx';
 
 // import ProtectedRoute from './components/ProtectedRoute.jsx';
 
@@ -107,6 +109,16 @@ const router = createBrowserRouter([
     
     path: '/queue', 
     element: <Queue />,
+  },
+  {
+    
+    path: '/gallery', 
+    element: <CircularGallery />,
+  },
+  {
+    
+    path: '/forgot_password', 
+    element: <Forgot_password />,
   },
 
   
