@@ -13,7 +13,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${apiUrl}/login/admin`, {
+      const response = await axios.post(`${apiUrl}/login/`, {
         email,
         password,
       });
@@ -26,8 +26,8 @@ const Login = () => {
           email: data.email,
           profile_image:data.profile_image ,
           nick_name: data.first_name,
-          phone_number:data.phone_number
-          
+          phone_number:data.phone_number,
+          user_id:data.user_id
 
         
         }; 

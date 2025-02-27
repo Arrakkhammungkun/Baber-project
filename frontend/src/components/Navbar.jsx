@@ -61,8 +61,8 @@ const Navbar = () => {
           <a href="/test_service" className="hover:text-gray-300">
             บริการ
           </a>
-          <a href="/about" className="hover:text-gray-300">
-            เกี่ยวกับเรา
+          <a href="/queue" className="hover:text-gray-300">
+            รายการจอง
           </a>
           <a href="/contact" className="hover:text-gray-300">
             ติดต่อเรา
