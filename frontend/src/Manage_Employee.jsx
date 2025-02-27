@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 const apiUrl =import.meta.env.VITE_API_URL;
-import Layout from './components/Layout';
+
 import axios from "axios";
 import Add_Employees from "./components/Add_Employees";
 import Swal from 'sweetalert2';
 import Edit_Employees from "./components/Edit_Employees";
+import LayoutAdmin from './components/LayoutAdmin';
 const Manage_Employee = () => {
   const [employee, setemployee] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -99,7 +100,7 @@ const Manage_Employee = () => {
   
   return (
     <div >
-        <Layout>
+        <LayoutAdmin>
         <Add_Employees isOpen={isModalOpen} onClose={handleCloseModal} onAddEmployee={handleAddService} />
         <Edit_Employees
             isOpen={isEditModalOpen}
@@ -234,7 +235,7 @@ const Manage_Employee = () => {
       <div className='my-[18rem]'>
 
       </div>
-      </Layout>
+      </LayoutAdmin>
     </div>
   );
 };

@@ -29,7 +29,7 @@ const Login = () => {
         console.log('Login successful:', data);  
           
         
-        window.location.href = '/admin/manage/bookings'; 
+        //window.location.href = '/admin/dashboard'; 
         
       }
     } catch (err) {

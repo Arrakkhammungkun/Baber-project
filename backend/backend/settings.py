@@ -146,8 +146,12 @@ CORS_ALLOWED_ORIGINS = [
 ]
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',  # ให้ส่งผลลัพธ์เป็น JSON
+        'rest_framework.renderers.JSONRenderer',  # คงไว้เหมือนเดิม
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',  # ยังคงต้องมีเพื่อให้ token ทำงาน
     ]
+    # ลบ 'DEFAULT_PERMISSION_CLASSES' ออก เพื่อไม่ให้บังคับทุก API ต้องมี token
 }
 
 
