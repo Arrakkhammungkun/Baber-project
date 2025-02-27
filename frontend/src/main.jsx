@@ -26,6 +26,7 @@ import Managment from './Managment.jsx';
 import Dashboard from './Dashboard.jsx';
 import Queue from './Queue.jsx';
 import CircularGallery from './CircularGallery.jsx';
+import Profile from './Profile.jsx';
 
 // import ProtectedRoute from './components/ProtectedRoute.jsx';
 
@@ -119,6 +120,11 @@ const router = createBrowserRouter([
     
     path: '/forgot_password', 
     element: <Forgot_password />,
+  },
+  {
+    
+    path: '/profile', 
+    element: <Profile />,
   },
 
   

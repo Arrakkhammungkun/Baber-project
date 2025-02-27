@@ -1,4 +1,4 @@
-/* eslint-disable no-irregular-whitespace */
+
 import { useState } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import axios from 'axios';
