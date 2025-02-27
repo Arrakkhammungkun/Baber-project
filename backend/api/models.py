@@ -192,7 +192,7 @@ def update_dashboard_summary(booking_date, status):
         summary.bookings_today += 1
         print(f"Bookings today increased: {summary.bookings_today}")
     elif status == 'cancelled':
-        summary.bookings_today -= 1  # ลดจำนวนการจอง
+          # ลดจำนวนการจอง
         summary.cancelled_count += 1  # เพิ่มจำนวนการยกเลิก
         if summary.in_progress_count > 0:  # ลด in_progress ถ้ามี
             summary.in_progress_count -= 1

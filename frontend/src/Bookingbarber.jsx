@@ -7,7 +7,7 @@ import Loader from "./components/Loader";
 const apiUrl = import.meta.env.VITE_API_URL;
 import Swal from 'sweetalert2';
 import utc from "dayjs/plugin/utc";
-
+import { useAuth } from './contexts/AuthContext';
 import timezone from "dayjs/plugin/timezone";
 import "dayjs/locale/th"
 const Bookingbarber = () => {
@@ -16,8 +16,9 @@ const Bookingbarber = () => {
   
   // ตั้งค่า locale เป็นภาษาไทย
   dayjs.locale("th");
-  
+  const { token,user } = useAuth();
 
+  console.log("User ",user || "ไม่มีlogin")
 
   const {serviceId } = useParams();
   const [employees, setEmployees] = useState([]);
@@ -230,6 +231,16 @@ useEffect(() => {
 
   const handleBooking = async () => {
       setIsLoading(true);
+      if (!token) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'กรุณา login',
+          confirmButtonText: 'ตกลง'
+        });
+        setIsLoading(false);
+        return;
+      }
+
       if (!selectedEmployeeId || !selectedTimeText) {
         Swal.fire({
           icon: 'warning',
@@ -261,7 +272,7 @@ useEffect(() => {
       }
     
       const bookingData = {
-        customer: "67925c7a28a366b5a19b5998", 
+        customer: user.user_id, 
         service: serviceId,           
         employee: selectedEmployeeId.id,  
         date: selectedDate.format("YYYY-MM-DD"),
