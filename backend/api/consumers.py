@@ -1,8 +1,7 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.serializers.json import DjangoJSONEncoder
-from datetime import datetime
-from .models import Booking  # นำเข้ารุ่น Booking
+from .models import Booking
 
 class QueueConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -21,52 +20,33 @@ class QueueConsumer(AsyncWebsocketConsumer):
         if action == "fetch_queue":
             queue_data = await self.get_queue_data()
             await self.send(text_data=json.dumps(queue_data, cls=DjangoJSONEncoder))
-            
-    async def update_queue_after_deletion(self, employee_id):
-        """ รีเซ็ตลำดับคิวของพนักงานคนนั้นหลังจากมีการลบ """
-        bookings = Booking.objects.filter(employee_id=employee_id).order_by("start_time")
-
-        # รีเซ็ตหมายเลขคิว
-        for index, b in enumerate(bookings, start=1):
-            b.queue_number = index  # ตั้งค่าลำดับใหม่
-            b.save(update_fields=["queue_number"])  # อัปเดตเฉพาะ field queue_number
 
     async def send_queue_update(self, event):
-        """ อัปเดตข้อมูลจากฐานข้อมูลจริงก่อนส่งไปยัง frontend """
-        queue_data = await self.get_queue_data()  # ดึงข้อมูลใหม่ล่าสุด
-        print("อัปเดตคิวล่าสุด:", queue_data)
-
-        # ส่งข้อมูลคิวใหม่ให้ทุกคนที่เชื่อมต่อ
-        await self.send(text_data=json.dumps(queue_data, cls=DjangoJSONEncoder))
-
-
+        data = event["data"]
+        print("Sending updated queue:", data)
+        await self.send(text_data=json.dumps(data, cls=DjangoJSONEncoder))
 
     async def delete_queue(self, event):
-        """ ลบคิวออกจาก frontend """
         booking_id = event["booking_id"]
         await self.send(text_data=json.dumps({"delete": booking_id}))
 
-
     async def get_queue_data(self):
-        """ ดึงข้อมูลคิวล่าสุดและกำหนดลำดับคิวของพนักงานแต่ละคน """
-        bookings = Booking.objects.all().order_by("employee", "start_time")  # เรียงตามพนักงานและเวลาเริ่มต้น
-
-        # จัดลำดับคิวแยกตามพนักงาน
+        bookings = Booking.objects.filter(status__in=["pending", "In_progress"]).order_by("employee", "start_time")
         employee_queue = {}
         queue_data = []
 
-        for index, b in enumerate(bookings):
+        for b in bookings:
             employee_id = str(b.employee.id)
-
-            # ตรวจสอบว่าพนักงานคนนี้มีคิวแล้วหรือยัง
             if employee_id not in employee_queue:
-                employee_queue[employee_id] = 0  # เริ่มจากคิวที่ 0
+                employee_queue[employee_id] = 0
+            queue_number = employee_queue[employee_id]
+            employee_queue[employee_id] += 1
 
-            queue_number = employee_queue[employee_id]  # คิวของพนักงานคนนี้
-            employee_queue[employee_id] += 1  # เพิ่มลำดับคิวสำหรับคิวถัดไป
+            # แปลง birthday เป็น string ถ้ามีค่า
+            birthday = b.employee.dob.isoformat() if b.employee.dob else None
 
             queue_data.append({
-                "queue_number": queue_number,  # เพิ่มคิวที่ถูกต้อง
+                "queue_number": queue_number,
                 "id": str(b.id),
                 "customer": {
                     "id": str(b.customer.id),
@@ -83,7 +63,7 @@ class QueueConsumer(AsyncWebsocketConsumer):
                     "profile": b.employee.employee_image_url,
                     "nickname": b.employee.nickname,
                     "gender": b.employee.gender,
-                    "birthday": b.employee.dob
+                    "birthday": birthday,  # แปลงเป็น string
                 },
                 "service": {
                     "id": str(b.service.id),
@@ -93,8 +73,58 @@ class QueueConsumer(AsyncWebsocketConsumer):
                     "duration": b.service.duration,
                     "image_url": b.service.image_url
                 },
-                "start_time": b.start_time,
-                "end_time": b.end_time,
+                "start_time": b.start_time.isoformat(),
+                "end_time": b.end_time.isoformat(),
+                "status": b.status,
+            })
+
+        return queue_data
+
+    def get_queue_data_sync(self):
+        bookings = Booking.objects.filter(status__in=["pending", "In_progress"]).order_by("employee", "start_time")
+        employee_queue = {}
+        queue_data = []
+
+        for b in bookings:
+            employee_id = str(b.employee.id)
+            if employee_id not in employee_queue:
+                employee_queue[employee_id] = 0
+            queue_number = employee_queue[employee_id]
+            employee_queue[employee_id] += 1
+
+            # แปลง birthday เป็น string ถ้ามีค่า
+            birthday = b.employee.dob.isoformat() if b.employee.dob else None
+
+            queue_data.append({
+                "queue_number": queue_number,
+                "id": str(b.id),
+                "customer": {
+                    "id": str(b.customer.id),
+                    "first_name": b.customer.first_name,
+                    "last_name": b.customer.last_name,
+                    "email": b.customer.email,
+                    "profile": b.customer.profile_image,
+                },
+                "employee": {
+                    "id": employee_id,
+                    "first_name": b.employee.first_name,
+                    "last_name": b.employee.last_name,
+                    "position": b.employee.position,
+                    "profile": b.employee.employee_image_url,
+                    "nickname": b.employee.nickname,
+                    "gender": b.employee.gender,
+                    "birthday": birthday,  # แปลงเป็น string
+                },
+                "service": {
+                    "id": str(b.service.id),
+                    "description": b.service.description,
+                    "name": b.service.name,
+                    "price": b.service.price,
+                    "duration": b.service.duration,
+                    "image_url": b.service.image_url
+                },
+                "start_time": b.start_time.isoformat(),
+                "end_time": b.end_time.isoformat(),
                 "status": b.status,
             })
 
