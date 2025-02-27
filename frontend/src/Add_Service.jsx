@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 const apiUrl =import.meta.env.VITE_API_URL;
-import Layout from './components/Layout';
+
 import axios from "axios";
 import EditServiceForm from "./components/EditServiceForm";
 import AddServiceForm from "./components/AddServiceForm";
 import Swal from 'sweetalert2';
+import LayoutAdmin from './components/LayoutAdmin';
 const Add_Service = () => {
   const [services, setServices] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -79,7 +80,7 @@ const Add_Service = () => {
   
   return (
     <div >
-        <Layout>
+        <LayoutAdmin>
         <EditServiceForm
             isOpen={isEditModalOpen}
             onClose={() => setIsEditModalOpen(false)}
@@ -152,7 +153,7 @@ const Add_Service = () => {
       <div className='my-[18rem]'>
 
       </div>
-      </Layout>
+      </LayoutAdmin>
     </div>
   );
 };

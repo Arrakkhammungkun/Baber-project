@@ -1,6 +1,6 @@
 import { useState } from "react";
 import dayjs from "dayjs"; // ติดตั้งด้วย npm install dayjs
-
+import LayoutAdmin from './components/LayoutAdmin';
 const DateTimePicker = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [selectedTime, setSelectedTime] = useState(0);
@@ -18,6 +18,9 @@ const DateTimePicker = () => {
   };
 
   return (
+    <LayoutAdmin>
+
+   
     <div className="w-full md:w-1/2 lg:w-1/3 mx-auto p-4">
       <h1 className="text-xl font-bold text-gray-800 p-2 capitalize text-center">
         Select Date & Time
@@ -112,6 +115,7 @@ const DateTimePicker = () => {
         Book now
       </button>
     </div>
+    </LayoutAdmin>
   );
 };
 
