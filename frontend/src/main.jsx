@@ -1,7 +1,7 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import './index.css';
-import App from './App.jsx';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import App from "./App.jsx";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -38,88 +38,83 @@ import VerifyOTPForget from './components/VerifyOTPForget.jsx';
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <Home />,
   },
   {
-    path: '/home',
+    path: "/home",
     element: <App />,
   },
   {
-    path: '/register',
+    path: "/register",
     element: <Register />,
   },
   {
-    path: '/login',
+    path: "/login",
     element: <Login />,
   },
   {
-    path: '/login/admin',
+    path: "/login/admin",
     element: <Login_admin />,
   },
   {
-    path: '/add/services',
+    path: "/add/services",
     element: <AddServiceForm />,
   },
   {
-    path: '/admin/addservices',
+    path: "/admin/addservices",
     element: <Add_Service />,
   },
   {
-    path: '/admin/editservice',
+    path: "/admin/editservice",
     element: <EditServiceForm />,
   },
   {
-    path: '/bookingbarber',
+    path: "/bookingbarber",
     element: <Bookingbarber />,
   },
   {
-    path: 'admin/manage/employees',
+    path: "admin/manage/employees",
     element: <Manage_Employee />,
   },
   {
-    path: 'bookings',
-    element: <BookingForm  />,
+    path: "bookings",
+    element: <BookingForm />,
   },
   {
-    path: 'admin/manage/bookings',
-    element: <Booking_Management  />,
+    path: "admin/manage/bookings",
+    element: <Booking_Management />,
   },
   {
-    path: 'test',
-    element: <Booking  />,
+    path: "test",
+    element: <Booking />,
   },
   {
-    path: 'test_adminQ',
-    element: <AdminQueueStatus  />,
+    path: "test_adminQ",
+    element: <AdminQueueStatus />,
   },
   {
-    path: 'test_service',
-    element: <Test_service  />,
+    path: "test_service",
+    element: <Test_service />,
   },
   {
-    
-    path: '/test_service/:serviceId/bookingbarber', 
+    path: "/test_service/:serviceId/bookingbarber",
     element: <Bookingbarber />,
   },
   {
-    
-    path: '/admin/manage', 
+    path: "/admin/manage",
     element: <Managment />,
   },
   {
-    
-    path: '/admin/dashboard', 
+    path: "/admin/dashboard",
     element: <Dashboard />,
   },
   {
-    
-    path: '/queue', 
+    path: "/queue",
     element: <Queue />,
   },
   {
-    
-    path: '/gallery', 
+    path: "/gallery",
     element: <CircularGallery />,
   },
   {
@@ -128,18 +123,15 @@ const router = createBrowserRouter([
     element: <ForgotPassword />,
   },
   {
-    
-    path: '/profile', 
+    path: "/profile",
     element: <Profile />,
   },
   {
-    
-    path: '/register/step1', 
+    path: "/register/step1",
     element: <RegisterStep1 />,
   },
   {
-    
-    path: '/verify-otp', 
+    path: "/verify-otp",
     element: <VerifyOTP />,
   },
   {
@@ -162,7 +154,7 @@ const router = createBrowserRouter([
 
 ]);
 
-createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
       <RouterProvider router={router} />

@@ -23,7 +23,9 @@ const Booking_Management = () => {
         const data = JSON.parse(event.data);
         console.log("Parsed data:", data);
         if (data.delete) {
-          setQueue((prevQueue) => prevQueue.filter(q => q.id !== data.delete));
+          setQueue((prevQueue) =>
+            prevQueue.filter((q) => q.id !== data.delete)
+          );
         } else if (Array.isArray(data)) {
           setQueue(data); // อัพเดทข้อมูลคิวทั้งหมดจาก WebSocket
         } else if (data && typeof data === "object") {
@@ -31,7 +33,9 @@ const Booking_Management = () => {
             const updatedQueue = prevQueue.map((q) =>
               q.id === data.id ? { ...q, ...data } : q
             );
-            return prevQueue.some((q) => q.id === data.id) ? updatedQueue : [...prevQueue, data];
+            return prevQueue.some((q) => q.id === data.id)
+              ? updatedQueue
+              : [...prevQueue, data];
           });
         }
       } catch (error) {
@@ -108,11 +112,13 @@ const Booking_Management = () => {
   return (
     <div>
       <LayoutAdmin>
-        <div className='container mt-24 mx-auto'>
+        <div className="container mt-24 mx-auto">
           <header className="mb-2 text-start">
-            <h1 className="text-2xl font-bold text-gray-800 p-2 ml-20">BOOKING MANAGEMENT</h1>
+            <h1 className="text-2xl font-bold text-gray-800 p-2 ml-20">
+              BOOKING MANAGEMENT
+            </h1>
             <h1 className="text-xl font-bold text-gray-800 p-2">Queue</h1>
-            <hr className='bg-black border-black text-black border-2 px-2' />
+            <hr className="bg-black border-black text-black border-2 px-2" />
           </header>
           <div className="max-w-full mx-auto bg-white shadow-md rounded-lg p-4">
             <div className="space-y-4">
@@ -169,18 +175,21 @@ const Booking_Management = () => {
                           : (q.queue_position || "ไม่ระบุ")}
                       </p>
                       <p>
-                        ลูกค้า: {typeof q.customer === "string" 
-                          ? q.customer 
+                        ลูกค้า:{" "}
+                        {typeof q.customer === "string"
+                          ? q.customer
                           : `${q.customer.first_name} ${q.customer.last_name}`}
                       </p>
                       <p>
-                        พนักงาน: {typeof q.employee === "string" 
-                          ? q.employee 
+                        พนักงาน:{" "}
+                        {typeof q.employee === "string"
+                          ? q.employee
                           : `${q.employee.first_name} ${q.employee.last_name}`}
                       </p>
                       <p>
-                        บริการ: {typeof q.service === "string" 
-                          ? q.service 
+                        บริการ:{" "}
+                        {typeof q.service === "string"
+                          ? q.service
                           : `${q.service.name}`}
                       </p>
                       <p>
@@ -222,7 +231,7 @@ const Booking_Management = () => {
             </div>
           </div>
         </div>
-        <div className='my-[20rem]'></div>
+        <div className="my-[20rem]"></div>
       </LayoutAdmin>
     </div>
   );
