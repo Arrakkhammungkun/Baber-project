@@ -14,7 +14,8 @@ class Member(Document):
     password = StringField(max_length=255, default="defaultpassword")
     role = StringField(max_length=10, choices=["admin", "user"], default="user")
     profile_image = StringField(max_length=255, null=True, blank=True)
-
+    otp = StringField(max_length=6, null=True, blank=True)  
+    is_verified = BooleanField(default=False)
 
 
     created_at = DateTimeField(default=datetime.utcnow)
