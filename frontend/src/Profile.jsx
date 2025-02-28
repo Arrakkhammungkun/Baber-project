@@ -55,7 +55,7 @@ const ProfilePage = () => {
   //   setFirstName(user.first_name || "");
   //   setLastName(user.last_name || "");
   //   setProfileImage(user.profile_image || "");
-    
+
   // };
 
   const handleEditImage = async () => {
@@ -64,15 +64,12 @@ const ProfilePage = () => {
     try {
       let formData = new FormData();
       formData.append("profile_image", file);
-       await axios.post(`${apiUrl}/upload-profile/`, formData, {
+      await axios.post(`${apiUrl}/upload-profile/`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       });
-      
-
-      
     } catch (err) {
       if (err.response) {
         setError(err.response.data.message);

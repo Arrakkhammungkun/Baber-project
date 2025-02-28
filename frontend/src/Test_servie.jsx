@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 const apiUrl = import.meta.env.VITE_API_URL;
 import Layout from "./components/Layout";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";  
+import { useNavigate } from "react-router-dom";
 
 const Test_service = () => {
   const [services, setServices] = useState([]);
@@ -14,7 +14,9 @@ const Test_service = () => {
     axios
       .get(`${apiUrl}/services/`)
       .then((response) => {
-        const activeService = response.data.filter((service) => service.status === "Active");
+        const activeService = response.data.filter(
+          (service) => service.status === "Active"
+        );
         setServices(activeService);
       })
       .catch((error) => {
@@ -102,8 +104,12 @@ const Test_service = () => {
                     />
                   </div>
                   <div className="text-white px-2 flex-1">
-                    <p className="uppercase font-bold text-2xl">{service.name}</p>
-                    <p className="mt-1 text-sm">คำอธิบาย {service.description}</p>
+                    <p className="uppercase font-bold text-2xl">
+                      {service.name}
+                    </p>
+                    <p className="mt-1 text-sm">
+                      คำอธิบาย {service.description}
+                    </p>
                     <div className="mt-1 flex">
                       <span className="mr-2 capitalize">เวลาบริการ :</span>
                       {service.duration} นาที

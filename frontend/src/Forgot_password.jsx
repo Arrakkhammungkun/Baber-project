@@ -1,20 +1,17 @@
-
-import { useState } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { useState } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const Forgot_password = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirm_password: ''
+    email: "",
+    password: "",
+    confirm_password: "",
   });
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [isResetSuccess, setIsResetSuccess] = useState(false);
   const [isUpdateSuccess, setIsUpdateSuccess] = useState(false);
-
-  
 
   const handleChange = (e) => {
     setFormData({
@@ -27,59 +24,59 @@ const Forgot_password = () => {
     e.preventDefault();
     try {
       const response = await fetch(`${apiUrl}/reset-password/`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email: formData.email }),
       });
-      
+
       if (response.ok) {
         setIsResetSuccess(true);
-        setMessage('');
+        setMessage("");
       } else {
         const data = await response.json();
-        setMessage(data.detail || 'Error: Unable to reset password');
+        setMessage(data.detail || "Error: Unable to reset password");
       }
     } catch (err) {
-      setMessage('Error: Unable to reset password');
+      setMessage("Error: Unable to reset password");
     }
   };
 
   const handleConfirm = async (e) => {
     e.preventDefault();
-    
+
     if (formData.password.length < 8) {
-      setMessage('Password must be at least 8 characters long');
+      setMessage("Password must be at least 8 characters long");
       return;
     }
-    
+
     if (formData.password !== formData.confirm_password) {
-      setMessage('Passwords do not match');
+      setMessage("Passwords do not match");
       return;
     }
 
     try {
       const response = await fetch(`${apiUrl}/update-password/`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email: formData.email,
-          password: formData.password
+          password: formData.password,
         }),
       });
 
       const data = await response.json();
       if (response.ok) {
         setIsUpdateSuccess(true);
-        setMessage('');
+        setMessage("");
       } else {
-        setMessage(data.detail || 'Error: Unable to update password');
+        setMessage(data.detail || "Error: Unable to update password");
       }
     } catch (err) {
-      setMessage('Error: Unable to update password');
+      setMessage("Error: Unable to update password");
     }
   };
 
@@ -121,9 +118,16 @@ const Forgot_password = () => {
 
       {!isResetSuccess ? (
         <div className="relative mx-auto p-6 bg-white/25 backdrop-blur-sm rounded-3xl shadow-md w-full max-w-sm h-2/5 flex flex-col">
-          <h2 className="text-3xl text-white font-bold mb-2">Forgot password</h2>
-          <p className="text-sm text-white font-normal mb-6">Please enter your email to reset the password</p>
-          <form onSubmit={handleResetPassword} className="space-y-4 flex flex-col flex-grow justify-between">
+          <h2 className="text-3xl text-white font-bold mb-2">
+            Forgot password
+          </h2>
+          <p className="text-sm text-white font-normal mb-6">
+            Please enter your email to reset the password
+          </p>
+          <form
+            onSubmit={handleResetPassword}
+            className="space-y-4 flex flex-col flex-grow justify-between"
+          >
             <div className="mb-4">
               <label className="text-white">Your Email</label>
               <input
@@ -144,16 +148,24 @@ const Forgot_password = () => {
                 Reset password
               </button>
             </div>
-            {message && <div className="mt-4 text-red-500 text-center">{message}</div>}
+            {message && (
+              <div className="mt-4 text-red-500 text-center">{message}</div>
+            )}
           </form>
         </div>
       ) : !isUpdateSuccess ? (
         <div className="relative mx-auto p-6 bg-white/25 backdrop-blur-sm rounded-3xl shadow-md w-full max-w-sm h-auto flex flex-col">
-          <h2 className="text-3xl text-white font-bold mb-2">Set a new password</h2>
+          <h2 className="text-3xl text-white font-bold mb-2">
+            Set a new password
+          </h2>
           <p className="text-sm text-white font-normal mb-6">
-            Create a new password. Ensure it differs from previous ones for security
+            Create a new password. Ensure it differs from previous ones for
+            security
           </p>
-          <form onSubmit={handleConfirm} className="space-y-4 flex flex-col flex-grow justify-between">
+          <form
+            onSubmit={handleConfirm}
+            className="space-y-4 flex flex-col flex-grow justify-between"
+          >
             <div className="mb-4">
               <label className="text-white">Password</label>
               <input
@@ -186,20 +198,34 @@ const Forgot_password = () => {
                 Update Password
               </button>
             </div>
-            {message && <div className="mt-4 text-red-500 text-center">{message}</div>}
+            {message && (
+              <div className="mt-4 text-red-500 text-center">{message}</div>
+            )}
           </form>
         </div>
       ) : (
         <div className="relative mx-auto p-6 bg-white/25 backdrop-blur-sm rounded-3xl shadow-md w-full max-w-sm h-auto flex flex-col">
           <div className="flex flex-col items-center justify-center h-full">
             <div className="checkmark animate-checkmark">
-              <svg className="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              <svg
+                className="w-16 h-16 text-green-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13l4 4L19 7"
+                ></path>
               </svg>
             </div>
             <p className="text-white text-2xl font-bold mt-4">Successful</p>
             <p className="text-sm text-white font-normal text-center mb-6">
-              Congratulations! Your password has been changed. Click continue to login
+              Congratulations! Your password has been changed. Click continue to
+              login
             </p>
             <form onSubmit={handleSuccessConfirm} className="mt-6 w-full">
               <Link to="/login">
@@ -215,7 +241,7 @@ const Forgot_password = () => {
         </div>
       )}
 
-      <style >{`
+      <style>{`
         .checkmark {
           display: inline-block;
         }
