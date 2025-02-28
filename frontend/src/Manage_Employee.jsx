@@ -1,25 +1,27 @@
 import { useEffect, useState } from "react";
-const apiUrl =import.meta.env.VITE_API_URL;
+const apiUrl = import.meta.env.VITE_API_URL;
 
 import axios from "axios";
 import Add_Employees from "./components/Add_Employees";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import Edit_Employees from "./components/Edit_Employees";
-import LayoutAdmin from './components/LayoutAdmin';
+import LayoutAdmin from "./components/LayoutAdmin";
 const Manage_Employee = () => {
   const [employee, setemployee] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  
-  
+
   function calculateAge(dateOfBirth) {
     const today = new Date();
     const birthDate = new Date(dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDifference = today.getMonth() - birthDate.getMonth();
 
-    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
 
@@ -36,59 +38,58 @@ const Manage_Employee = () => {
       .catch((error) => {
         console.error("Error fetching services:", error);
       });
-      
+  }, [isModalOpen, isEditModalOpen]);
 
-
-  }, [isModalOpen, isEditModalOpen]);  
-  
   const handleEdit = (employeeId) => {
     setSelectedServiceId(employeeId);
     setIsEditModalOpen(true);
-    
   };
   const handleAdd = (service) => {
     setIsModalOpen(true);
-    console.log(service); 
-    
+    console.log(service);
   };
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
   const handleUpdateService = (updatedemployee) => {
     setemployee((prevupdatedemployee) =>
-        prevupdatedemployee.map((employee) =>
-          employee.id === updatedemployee.id ? updatedemployee : employee
-        )
-      );
-      setIsEditModalOpen(false);
+      prevupdatedemployee.map((employee) =>
+        employee.id === updatedemployee.id ? updatedemployee : employee
+      )
+    );
+    setIsEditModalOpen(false);
   };
   const handleDelete = async (employeeId) => {
-   
     Swal.fire({
-      title: 'ยืนยันการดำเนินการ?',
-      text: 'คุณต้องการยืนยันการดำเนินการนี้หรือไม่?',
-      icon: 'warning',
+      title: "ยืนยันการดำเนินการ?",
+      text: "คุณต้องการยืนยันการดำเนินการนี้หรือไม่?",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'ยืนยัน',
-      cancelButtonText: 'ยกเลิก'
+      confirmButtonText: "ยืนยัน",
+      cancelButtonText: "ยกเลิก",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        
         try {
-          const response = await axios.delete(`${apiUrl}/employee/${employeeId}/`);
+          const response = await axios.delete(
+            `${apiUrl}/employee/${employeeId}/`
+          );
           console.log("Service deleted:", response.data);
-          await Swal.fire('ยืนยันแล้ว!', 'การดำเนินการเสร็จสมบูรณ์!', 'success');
+          await Swal.fire(
+            "ยืนยันแล้ว!",
+            "การดำเนินการเสร็จสมบูรณ์!",
+            "success"
+          );
           setemployee((prevemployee) =>
             prevemployee.filter((employee) => employee.id !== employeeId)
           );
         } catch (error) {
           console.error("Error deleting service:", error);
-          
-          Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถลบบริการได้!', 'error');
+
+          Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถลบบริการได้!", "error");
         }
       } else if (result.isDismissed) {
         // หากผู้ใช้กด "ยกเลิก" ให้แสดงข้อความยกเลิก
-        Swal.fire('ยกเลิกแล้ว!', 'การดำเนินการถูกยกเลิก!', 'error');
+        Swal.fire("ยกเลิกแล้ว!", "การดำเนินการถูกยกเลิก!", "error");
       }
     });
   };
@@ -97,27 +98,32 @@ const Manage_Employee = () => {
     setemployee((prevemployee) => [...prevemployee, employee]); // อัปเดต state ทันทีที่เพิ่ม
   };
 
-  
   return (
-    <div >
-        <LayoutAdmin>
-        <Add_Employees isOpen={isModalOpen} onClose={handleCloseModal} onAddEmployee={handleAddService} />
+    <div>
+      <LayoutAdmin>
+        <Add_Employees
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onAddEmployee={handleAddService}
+        />
         <Edit_Employees
-            isOpen={isEditModalOpen}
-            onClose={() => setIsEditModalOpen(false)}
-            employeesId={selectedServiceId}
-            onUpdateEmployees={handleUpdateService} 
-          />
-       <div className='container pt-20 mx-auto '>
-        
-       
-      <header className="mb-2 text-start ">
-        <h1 className="text-2xl font-bold text-gray-800 p-2 ml-10">MANAGEMENT</h1>
-        <h1 className="text-xl font-bold text-gray-800 p-2 ">Barber Information</h1>
-        <hr className='bg-black border-black text-black border-2 px-2' />
-      </header>
-      <div className="max-w-full mx-auto bg-white shadow-md rounded-lg p-4">
-        {/* <div className="flex gap-2 mr-8">
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          employeesId={selectedServiceId}
+          onUpdateEmployees={handleUpdateService}
+        />
+        <div className="container pt-20 mx-auto ">
+          <header className="mb-2 text-start ">
+            <h1 className="text-2xl font-bold text-gray-800 p-2 ml-10">
+              MANAGEMENT
+            </h1>
+            <h1 className="text-xl font-bold text-gray-800 p-2 ">
+              Barber Information
+            </h1>
+            <hr className="bg-black border-black text-black border-2 px-2" />
+          </header>
+          <div className="max-w-full mx-auto bg-white shadow-md rounded-lg p-4">
+            {/* <div className="flex gap-2 mr-8">
             <div className="border-black p-2 text-center  border-[3px] rounded-md w-36 ">
                 NO.
             </div>
@@ -141,65 +147,99 @@ const Manage_Employee = () => {
 
         </div> */}
 
-
-<table className="w-full  border-gray-600 text-white mt-3 border-separate border-spacing-y-2">
-  <thead className="relative -top-3">
-    <tr className="bg-white text-black">
-      <th className="border-[3px] p-[15px] l border-black border-r-0">No.</th>
-      <th className="border-[3px] p-2 border-black border-r-0">Name</th>
-      <th className="border-[3px] p-2 border-black border-r-0">Sex</th>
-      <th className="border-[3px] p-2 border-black border-r-0">Age</th>
-      <th className="border-[3px] p-2 border-black border-r-0">Job Position</th>
-      <th className="border-[3px] p-2 border-black border-r-0">Working Status</th>
-      <th className="border-[3px] p-2  border-black">Manage</th>
-    </tr>
-  </thead>
-  <tbody>
-    {employee.map((employee, index) => (
-      <tr key={employee.id} className="bg-black text-white text-center rounded-lg ">
-        <td className="border-[1px] rounded-l-md border-black p-2">{index + 1}</td>
-        <td className="border-[1px] p-2 border-black">{employee.first_name} {employee.last_name}</td>
-        <td className="border-[1px] p-2 border-black">{employee.gender}</td>
-        <td className="border-[1px] p-2 border-black">{calculateAge(employee.dob)} ปี</td>
-        <td className="border-[1px] p-2 border-black">{employee.position}</td>
-        <td 
-          className={`border-[1px] p-2 border-black 
+            <table className="w-full  border-gray-600 text-white mt-3 border-separate border-spacing-y-2">
+              <thead className="relative -top-3">
+                <tr className="bg-white text-black">
+                  <th className="border-[3px] p-[15px] l border-black border-r-0">
+                    No.
+                  </th>
+                  <th className="border-[3px] p-2 border-black border-r-0">
+                    Name
+                  </th>
+                  <th className="border-[3px] p-2 border-black border-r-0">
+                    Sex
+                  </th>
+                  <th className="border-[3px] p-2 border-black border-r-0">
+                    Age
+                  </th>
+                  <th className="border-[3px] p-2 border-black border-r-0">
+                    Job Position
+                  </th>
+                  <th className="border-[3px] p-2 border-black border-r-0">
+                    Working Status
+                  </th>
+                  <th className="border-[3px] p-2  border-black">Manage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {employee.map((employee, index) => (
+                  <tr
+                    key={employee.id}
+                    className="bg-black text-white text-center rounded-lg "
+                  >
+                    <td className="border-[1px] rounded-l-md border-black p-2">
+                      {index + 1}
+                    </td>
+                    <td className="border-[1px] p-2 border-black">
+                      {employee.first_name} {employee.last_name}
+                    </td>
+                    <td className="border-[1px] p-2 border-black">
+                      {employee.gender}
+                    </td>
+                    <td className="border-[1px] p-2 border-black">
+                      {calculateAge(employee.dob)} ปี
+                    </td>
+                    <td className="border-[1px] p-2 border-black">
+                      {employee.position}
+                    </td>
+                    <td
+                      className={`border-[1px] p-2 border-black 
             ${employee.status === "Active" ? "text-green-500" : ""} 
-            ${employee.status === "Inactive" ? "text-red-500" : ""}`
-          }
-        >
-          {employee.status}
-        </td>
+            ${employee.status === "Inactive" ? "text-red-500" : ""}`}
+                    >
+                      {employee.status}
+                    </td>
 
-        <td className="border-[1px] p-2  gap-2 justify-center border-black  rounded-r-md">
-          <div className="flex gap-2 justify-center">
-          <button className="p-2" onClick={() => handleEdit(employee.id)}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 512 512">
-              <path fill="#ffffff" d="M471.6 21.7c-21.9-21.9-57.3-21.9-79.2 0L362.3 51.7l97.9 97.9 30.1-30.1c21.9-21.9 21.9-57.3 0-79.2L471.6 21.7zm-299.2 220c-6.1 6.1-10.8 13.6-13.5 21.9l-29.6 88.8c-2.9 8.6-.6 18.1 5.8 24.6s15.9 8.7 24.6 5.8l88.8-29.6c8.2-2.7 15.7-7.4 21.9-13.5L437.7 172.3 339.7 74.3 172.4 241.7zM96 64C43 64 0 107 0 160L0 416c0 53 43 96 96 96l256 0c53 0 96-43 96-96l0-96c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7-14.3 32-32 32L96 448c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 64z"/>
-            </svg>
-          </button>
-          <button onClick={() => handleDelete(employee.id)} className="p-2 rounded text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 448 512">
-              <path fill="#db1414" d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z"/>
-            </svg>
-          </button>
-          </div>
+                    <td className="border-[1px] p-2  gap-2 justify-center border-black  rounded-r-md">
+                      <div className="flex gap-2 justify-center">
+                        <button
+                          className="p-2"
+                          onClick={() => handleEdit(employee.id)}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            viewBox="0 0 512 512"
+                          >
+                            <path
+                              fill="#ffffff"
+                              d="M471.6 21.7c-21.9-21.9-57.3-21.9-79.2 0L362.3 51.7l97.9 97.9 30.1-30.1c21.9-21.9 21.9-57.3 0-79.2L471.6 21.7zm-299.2 220c-6.1 6.1-10.8 13.6-13.5 21.9l-29.6 88.8c-2.9 8.6-.6 18.1 5.8 24.6s15.9 8.7 24.6 5.8l88.8-29.6c8.2-2.7 15.7-7.4 21.9-13.5L437.7 172.3 339.7 74.3 172.4 241.7zM96 64C43 64 0 107 0 160L0 416c0 53 43 96 96 96l256 0c53 0 96-43 96-96l0-96c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7-14.3 32-32 32L96 448c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 64z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(employee.id)}
+                          className="p-2 rounded text-white"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            viewBox="0 0 448 512"
+                          >
+                            <path
+                              fill="#db1414"
+                              d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
-        </td>
-      </tr>
-    ))}
-  </tbody>
-</table>
-
-
-
-
-
-
-       
-
-
-      {/* {employee.map((employee) => (
+            {/* {employee.map((employee) => (
             <div key={employee.id}> 
                 <div className='flex items-start'>
                     <div className="flex justify-between items-center bg-black w-full px-4 p-1 mb-2 rounded-md shadow-sm">
@@ -225,16 +265,17 @@ const Manage_Employee = () => {
             </div>
         )   
         )} */}
-        <div className='flex justify-end mt-3 mb-8'>
-            <button onClick={handleAdd} className="md:px-[5rem] px-6 py-4 bg-black text-white text-sm rounded-md hover:bg-[#464545]">
+            <div className="flex justify-end mt-3 mb-8">
+              <button
+                onClick={handleAdd}
+                className="md:px-[5rem] px-6 py-4 bg-black text-white text-sm rounded-md hover:bg-[#464545]"
+              >
                 +Add
-            </button>
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-      </div>
-      <div className='my-[18rem]'>
-
-      </div>
+        <div className="my-[18rem]"></div>
       </LayoutAdmin>
     </div>
   );

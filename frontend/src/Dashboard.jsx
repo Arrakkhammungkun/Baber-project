@@ -15,31 +15,52 @@ const Dashboard = () => {
   const [topServices, setTopServices] = useState([]);
   const [chartOptions, setChartOptions] = useState({
     series: [{ data: [], name: "Bookings" }],
-    chart: { type: "bar", height: 350, toolbar: { show: false }, background: "#242529", foreColor: "#ffffff" },
+    chart: {
+      type: "bar",
+      height: 350,
+      toolbar: { show: false },
+      background: "#242529",
+      foreColor: "#ffffff",
+    },
     colors: ["#00A9E0", "#FF6347", "#32CD32", "#FFD700", "#8A2BE2"],
-    plotOptions: { bar: { distributed: true, borderRadius: 4, columnWidth: "40%" } },
+    plotOptions: {
+      bar: { distributed: true, borderRadius: 4, columnWidth: "40%" },
+    },
     xaxis: { categories: [] },
     yaxis: { title: { text: "Bookings" } },
   });
 
   const fetchDashboardSummary = async (params) => {
     try {
-      const response = await axios.get(`${apiUrl}/dashboard/summary/`, { params });
+      const response = await axios.get(`${apiUrl}/dashboard/summary/`, {
+        params,
+      });
       const data = response.data;
       setSummary(data);
       if (Array.isArray(data.top_services)) {
         setTopServices(data.top_services);
-        const sortedTopServices = data.top_services.sort((a, b) => b.booking_count - a.booking_count);
+        const sortedTopServices = data.top_services.sort(
+          (a, b) => b.booking_count - a.booking_count
+        );
         setChartOptions((prevState) => ({
           ...prevState,
-          series: [{ data: sortedTopServices.map((service) => service.booking_count), name: 'Bookings' }],
-          xaxis: { categories: sortedTopServices.map((service) => service.service_name) },
+          series: [
+            {
+              data: sortedTopServices.map((service) => service.booking_count),
+              name: "Bookings",
+            },
+          ],
+          xaxis: {
+            categories: sortedTopServices.map(
+              (service) => service.service_name
+            ),
+          },
         }));
       } else {
         setTopServices([]);
         setChartOptions((prevState) => ({
           ...prevState,
-          series: [{ data: [], name: 'Bookings' }],
+          series: [{ data: [], name: "Bookings" }],
           xaxis: { categories: [] },
         }));
       }
@@ -122,19 +143,30 @@ const Dashboard = () => {
       <div className="container mt-24 mx-auto">
         <div className="flex-1 ml-0">
           <header className="mb-2 text-start">
-            <h1 className="text-2xl font-bold text-gray-800 p-2 ml-20 uppercase">Dashboard</h1>
-            <h1 className="text-xl font-bold text-gray-800 p-2 capitalize">Access Information</h1>
+            <h1 className="text-2xl font-bold text-gray-800 p-2 ml-20 uppercase">
+              Dashboard
+            </h1>
+            <h1 className="text-xl font-bold text-gray-800 p-2 capitalize">
+              Access Information
+            </h1>
             <hr className="bg-black border-black text-black border-2 px-2" />
           </header>
 
           <div className="text-xl font-bold text-gray-800 p-2 capitalize flex items-center gap-4 justify-between">
-            <h1>Date: {customDate && startDate && endDate ? `${startDate} to ${endDate}` : summary.summary_date}</h1>
+            <h1>
+              Date:{" "}
+              {customDate && startDate && endDate
+                ? `${startDate} to ${endDate}`
+                : summary.summary_date}
+            </h1>
             <select
               className="select select-end w-auto max-w-xs bg-[#242529] text-white"
               value={selectedTime}
               onChange={handleTimeChange}
             >
-              <option value="" disabled>Select Time</option>
+              <option value="" disabled>
+                Select Time
+              </option>
               <option value="Today">Today</option>
               <option value="Last week">Last week</option>
               <option value="Last month">Last month</option>
@@ -201,8 +233,15 @@ const Dashboard = () => {
 
           <div className="my-8">
             <div className="bg-white p-4 border rounded-lg shadow-lg">
-              <h2 className="flex text-lg font-bold mb-4 justify-center">Top 5 Services</h2>
-              <Chart options={chartOptions} series={chartOptions.series} type="bar" height={350} />
+              <h2 className="flex text-lg font-bold mb-4 justify-center">
+                Top 5 Services
+              </h2>
+              <Chart
+                options={chartOptions}
+                series={chartOptions.series}
+                type="bar"
+                height={350}
+              />
             </div>
           </div>
         </div>

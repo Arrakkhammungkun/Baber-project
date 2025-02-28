@@ -5,8 +5,6 @@ import axios from "axios";
 
 const Booking_service = () => {
   const [services, setServices] = useState([]);
-  
-  
 
   useEffect(() => {
     axios
@@ -35,31 +33,33 @@ const Booking_service = () => {
                 service
               </h1>
               <hr className="bg-black border-black text-black border px-2 mb-5 w-full" />
-              <div
-                className="bg-black shadow-md rounded-lg border p-4 h-auto flex"
-              >
+              <div className="bg-black shadow-md rounded-lg border p-4 h-auto flex">
                 <div className="flex items-center h-auto w-[200px] mr-2">
-                    <img src="./src/img/men'shaircut.jpg" alt="./src/img/14.jpg" className="rounded-lg h-[200px] w-[200px] object-cover"/>
+                  <img
+                    src="./src/img/men'shaircut.jpg"
+                    alt="./src/img/14.jpg"
+                    className="rounded-lg h-[200px] w-[200px] object-cover"
+                  />
                 </div>
                 <div className="text-xl text-white p-2 flex-1">
                   <p className="uppercase font-bold">men's haircut</p>
                   <p className="mt-3">
-                  A professional haircut tailored to your face shape and style
+                    A professional haircut tailored to your face shape and style
                   </p>
-                  <p className="mt-3 flex"><p className="mr-2 capitalize">price :</p>500 - 1,500 ฿</p>
-                  <p className="mt-3 flex"><p className="mr-2 capitalize">time :</p>20 - 40 Minute</p>
+                  <p className="mt-3 flex">
+                    <p className="mr-2 capitalize">price :</p>500 - 1,500 ฿
+                  </p>
+                  <p className="mt-3 flex">
+                    <p className="mr-2 capitalize">time :</p>20 - 40 Minute
+                  </p>
                   <div className="flex mt-3  justify-end ">
                     <button className="bg-white text-black uppercase px-6 py-2 rounded-md  hover:bg-slate-700 hover:text-white  transition duration-300 w-[150px] mr-3">
-                        select
+                      select
                     </button>
                   </div>
-                    
                 </div>
-                
               </div>
             </div>
-
-            
           </div>
         </div>
       </Layout>
