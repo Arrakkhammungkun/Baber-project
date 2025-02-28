@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from './contexts/AuthContext';
+import { useAuth } from "./contexts/AuthContext";
 const URLSOCKET = import.meta.env.VITE_API_URLSOCKET;
 const apiUrl = import.meta.env.VITE_API_URL;
 const apiUrl_img = import.meta.env.VITE_API_IMG;
@@ -24,14 +24,21 @@ const Queue = () => {
         });
         const data = await response.json();
         setQueue(data);
-        const userBookingsFiltered = data.filter((q) => q.customer.id === user.user_id);
+        const userBookingsFiltered = data.filter(
+          (q) => q.customer.id === user.user_id
+        );
         setUserBookings(userBookingsFiltered);
         if (userBookingsFiltered.length > 0) {
           setSelectedBooking(userBookingsFiltered[0]);
           const employeeQueues = data.filter(
-            (q) => q.employee.id === userBookingsFiltered[0].employee.id && q.status === "pending"
+            (q) =>
+              q.employee.id === userBookingsFiltered[0].employee.id &&
+              q.status === "pending"
           );
-          const userPosition = employeeQueues.findIndex((q) => q.id === userBookingsFiltered[0].id) + 1;
+          const userPosition =
+            employeeQueues.findIndex(
+              (q) => q.id === userBookingsFiltered[0].id
+            ) + 1;
           setPosition(userPosition > 0 ? userPosition : null);
         }
       } catch (error) {
@@ -55,7 +62,9 @@ const Queue = () => {
         setWsError(false);
         reconnectAttempts = 0;
         if (user?.user_id) {
-          newSocket.send(JSON.stringify({ action: "fetch_queue", user_id: user.user_id }));
+          newSocket.send(
+            JSON.stringify({ action: "fetch_queue", user_id: user.user_id })
+          );
         } else {
           console.warn("User not authenticated, skipping WebSocket data fetch");
         }
@@ -67,22 +76,27 @@ const Queue = () => {
           console.log("WebSocket data received:", data);
           if (Array.isArray(data)) {
             setQueue(data);
-            const updatedUserBookings = user && user.user_id
-              ? data.filter((q) => q.customer.id === user.user_id)
-              : [];
+            const updatedUserBookings =
+              user && user.user_id
+                ? data.filter((q) => q.customer.id === user.user_id)
+                : [];
             setUserBookings(updatedUserBookings);
 
             if (updatedUserBookings.length > 0) {
               let newSelected = selectedBooking
-                ? data.find((q) => q.id === selectedBooking.id) || updatedUserBookings[0]
+                ? data.find((q) => q.id === selectedBooking.id) ||
+                  updatedUserBookings[0]
                 : updatedUserBookings[0];
               setSelectedBooking(newSelected);
 
               if (newSelected) {
                 const employeeQueues = data.filter(
-                  (q) => q.employee.id === newSelected.employee.id && q.status === "pending"
+                  (q) =>
+                    q.employee.id === newSelected.employee.id &&
+                    q.status === "pending"
                 );
-                const userPosition = employeeQueues.findIndex((q) => q.id === newSelected.id) + 1;
+                const userPosition =
+                  employeeQueues.findIndex((q) => q.id === newSelected.id) + 1;
                 setPosition(userPosition > 0 ? userPosition : null);
               } else {
                 setPosition(null);
@@ -93,20 +107,26 @@ const Queue = () => {
             }
           } else if (data.delete) {
             setQueue((prev) => prev.filter((q) => q.id !== data.delete));
-            const updatedUserBookings = userBookings.filter((q) => q.id !== data.delete);
+            const updatedUserBookings = userBookings.filter(
+              (q) => q.id !== data.delete
+            );
             setUserBookings(updatedUserBookings);
 
             if (updatedUserBookings.length > 0) {
-              let newSelected = selectedBooking && selectedBooking.id === data.delete
-                ? updatedUserBookings[0]
-                : selectedBooking;
+              let newSelected =
+                selectedBooking && selectedBooking.id === data.delete
+                  ? updatedUserBookings[0]
+                  : selectedBooking;
               setSelectedBooking(newSelected);
 
               if (newSelected) {
                 const employeeQueues = queue.filter(
-                  (q) => q.employee.id === newSelected.employee.id && q.status === "pending"
+                  (q) =>
+                    q.employee.id === newSelected.employee.id &&
+                    q.status === "pending"
                 );
-                const userPosition = employeeQueues.findIndex((q) => q.id === newSelected.id) + 1;
+                const userPosition =
+                  employeeQueues.findIndex((q) => q.id === newSelected.id) + 1;
                 setPosition(userPosition > 0 ? userPosition : null);
               } else {
                 setPosition(null);
@@ -129,7 +149,9 @@ const Queue = () => {
             connectWebSocket();
           }, 3000);
         } else {
-          console.error("Max reconnect attempts reached. Please check backend WebSocket server.");
+          console.error(
+            "Max reconnect attempts reached. Please check backend WebSocket server."
+          );
           setWsError(true);
         }
       };
@@ -159,7 +181,9 @@ const Queue = () => {
       },
     })
       .then(() => {
-        console.log(`Booking ${bookingId} cancelled, waiting for WebSocket update`);
+        console.log(
+          `Booking ${bookingId} cancelled, waiting for WebSocket update`
+        );
       })
       .catch((error) => console.error("Error cancelling booking:", error));
   };
@@ -169,7 +193,8 @@ const Queue = () => {
     const employeeQueues = queue.filter(
       (q) => q.employee.id === booking.employee.id && q.status === "pending"
     );
-    const userPosition = employeeQueues.findIndex((q) => q.id === booking.id) + 1;
+    const userPosition =
+      employeeQueues.findIndex((q) => q.id === booking.id) + 1;
     setPosition(userPosition > 0 ? userPosition : null);
   };
 
@@ -178,9 +203,13 @@ const Queue = () => {
       return [];
     }
     const employeeId = selectedBooking.employee.id;
-    return queue.filter(
-      (q) => q.employee.id === employeeId && (q.status === "pending" || q.status === "In_progress")
-    ).sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+    return queue
+      .filter(
+        (q) =>
+          q.employee.id === employeeId &&
+          (q.status === "pending" || q.status === "In_progress")
+      )
+      .sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
   };
 
   if (!token) {
@@ -200,7 +229,9 @@ const Queue = () => {
     <Layout>
       <div className="container mx-auto mt-16 md:mt-24 px-4">
         <header className="mb-4">
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800 text-center md:text-left">Queue</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-800 text-center md:text-left">
+            Queue
+          </h1>
           <div className="flex flex-col md:flex-row justify-between mt-2">
             <h2 className="text-lg md:text-xl font-bold text-gray-800 border-b-4 border-black w-full md:w-1/2 mb-2 md:mb-0 md:mr-2 text-center md:text-left">
               Your booking queue
@@ -263,7 +294,8 @@ const Queue = () => {
                       <p className="text-sm md:text-base font-bold">
                         ช่าง:{" "}
                         <span>
-                          {booking.employee?.first_name} {booking.employee?.last_name}
+                          {booking.employee?.first_name}{" "}
+                          {booking.employee?.last_name}
                         </span>
                       </p>
                       <p className="text-sm md:text-base font-bold">
@@ -271,7 +303,8 @@ const Queue = () => {
                         <span>{booking.employee?.nickname || "ไม่ระบุ"}</span>
                       </p>
                       <p className="text-sm md:text-base font-bold">
-                        เพศ: <span>{booking.employee?.gender || "ไม่ระบุ"}</span>
+                        เพศ:{" "}
+                        <span>{booking.employee?.gender || "ไม่ระบุ"}</span>
                       </p>
                     </div>
                   </div>
@@ -283,20 +316,27 @@ const Queue = () => {
                     <div className="flex justify-between">
                       <p className="text-sm md:text-base font-bold">วันที่</p>
                       <p className="text-sm md:text-base font-bold">
-                        {new Date(booking.start_time).toLocaleDateString("th-TH")}
+                        {new Date(booking.start_time).toLocaleDateString(
+                          "th-TH"
+                        )}
                       </p>
                     </div>
                     <div className="flex justify-between mt-1">
                       <p className="text-sm md:text-base font-bold">เวลา</p>
                       <p className="text-sm md:text-base font-bold">
-                        {new Date(booking.start_time).toLocaleTimeString("th-TH", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {new Date(booking.start_time).toLocaleTimeString(
+                          "th-TH",
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
                       </p>
                     </div>
                     <div className="flex justify-between mt-1">
-                      <p className="text-sm md:text-base font-bold">ค่าบริการ</p>
+                      <p className="text-sm md:text-base font-bold">
+                        ค่าบริการ
+                      </p>
                       <p className="text-sm md:text-base font-bold">
                         {booking.service?.price || 500} บาท
                       </p>
@@ -330,22 +370,33 @@ const Queue = () => {
                 </div>
               ))
             ) : (
-              <p className="text-center text-sm md:text-base">คุณยังไม่มีคิวที่จอง</p>
+              <p className="text-center text-sm md:text-base">
+                คุณยังไม่มีคิวที่จอง
+              </p>
             )}
           </div>
 
           <div className="flex flex-col gap-2 text-white">
             {wsError && (
               <p className="text-red-500 text-center mb-2 text-sm md:text-base">
-                ไม่สามารถเชื่อมต่อ WebSocket ได้ กรุณาตรวจสอบการเชื่อมต่อหรือรอสักครู่
+                ไม่สามารถเชื่อมต่อ WebSocket ได้
+                กรุณาตรวจสอบการเชื่อมต่อหรือรอสักครู่
               </p>
             )}
-            <div key="queue-header" className="flex flex-col sm:flex-row justify-between bg-[#242529] p-2 rounded-lg items-center gap-2">
+            <div
+              key="queue-header"
+              className="flex flex-col sm:flex-row justify-between bg-[#242529] p-2 rounded-lg items-center gap-2"
+            >
               <div className="flex items-center">
                 <h3 className="text-lg md:text-2xl font-bold text-center sm:text-left">
                   ลำดับคิวของคุณ
                   {selectedBooking
-                    ? ` (การจอง ${selectedBooking.service?.name} - ${new Date(selectedBooking.start_time).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })})`
+                    ? ` (การจอง ${selectedBooking.service?.name} - ${new Date(
+                        selectedBooking.start_time
+                      ).toLocaleTimeString("th-TH", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })})`
                     : ""}
                 </h3>
               </div>
@@ -358,15 +409,18 @@ const Queue = () => {
                     : "bg-gray-500"
                 } w-12 h-12 md:w-16 md:h-16 flex items-center justify-center text-white rounded-lg border-white border-2`}
               >
-                <span className="text-2xl md:text-3xl font-bold">{position !== null ? position : "-"}</span>
+                <span className="text-2xl md:text-3xl font-bold">
+                  {position !== null ? position : "-"}
+                </span>
               </div>
             </div>
 
             <div className="mt-4">
-
               {userBookings.length > 0 && selectedBooking ? (
                 getEmployeeQueue().map((q) => {
-                  const queueIndex = getEmployeeQueue().findIndex((item) => item.id === q.id) + 1;
+                  const queueIndex =
+                    getEmployeeQueue().findIndex((item) => item.id === q.id) +
+                    1;
                   const bgColor =
                     queueIndex === 1
                       ? "bg-green-500"
@@ -410,10 +464,13 @@ const Queue = () => {
                           <p className="text-sm md:text-base font-bold">
                             เวลา:{" "}
                             <span className="text-gray-300">
-                              {new Date(q.start_time).toLocaleTimeString("th-TH", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
+                              {new Date(q.start_time).toLocaleTimeString(
+                                "th-TH",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
                             </span>
                           </p>
                         </div>
@@ -434,7 +491,10 @@ const Queue = () => {
 
                           </p>
                           <p className="text-sm md:text-base font-bold">
-                            บริการ: <span className="text-gray-300">{q.service?.name}</span>
+                            บริการ:{" "}
+                            <span className="text-gray-300">
+                              {q.service?.name}
+                            </span>
                           </p>
                         </div>
                       </div>
@@ -447,7 +507,9 @@ const Queue = () => {
                   );
                 })
               ) : (
-                <p className="text-center text-black text-sm md:text-base">ไม่มีคิวที่รอสำหรับการจองของคุณ</p>
+                <p className="text-center text-black text-sm md:text-base">
+                  ไม่มีคิวที่รอสำหรับการจองของคุณ
+                </p>
               )}
             </div>
           </div>
