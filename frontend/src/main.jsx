@@ -30,6 +30,8 @@ import CircularGallery from './CircularGallery.jsx';
 import Profile from './Profile.jsx';
 
 import ProfilePage from './Profile.jsx';
+import RegisterStep1 from './RegisterStep1.jsx';
+import VerifyOTP from './components/VerifyOTP.jsx';
 // import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 const router = createBrowserRouter([
@@ -127,6 +129,16 @@ const router = createBrowserRouter([
     
     path: '/profile', 
     element: <Profile />,
+  },
+  {
+    
+    path: '/register/step1', 
+    element: <RegisterStep1 />,
+  },
+  {
+    
+    path: '/verify-otp', 
+    element: <VerifyOTP />,
   },
 
   

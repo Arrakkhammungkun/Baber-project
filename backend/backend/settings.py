@@ -191,3 +191,6 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'https://localhost:5173', 
 ]
+# settings.py
+BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
