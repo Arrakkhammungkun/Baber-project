@@ -183,11 +183,14 @@ const Queue = () => {
     ).sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
   };
 
-  if (!user) {
+  if (!token) {
     return (
       <Layout>
-        <div className="container mx-auto mt-24 px-4 text-center text-white">
-          <h1 className="text-2xl md:text-3xl font-bold">กรุณาล็อกอินเพื่อดูคิวของคุณ</h1>
+        <div className="container mx-auto mt-24 px-4 text-center text-black ">
+          <h1 className="text-xl md:text-2xl font-bold mt-40">กรุณาล็อกอินเพื่อดูคิวของคุณ</h1>
+        </div>
+        <div className="py-[18rem]">
+          
         </div>
       </Layout>
     );
@@ -301,15 +304,17 @@ const Queue = () => {
                     <div className="flex flex-col sm:flex-row justify-between mt-1 gap-2">
                       <p className="text-sm md:text-base font-bold">
                         Status:{" "}
-                        <span
-                          className={
-                            booking.status === "pending"
-                              ? "text-[#FBBC05]"
-                              : "text-green-500"
-                          }
-                        >
-                          {booking.status}
-                        </span>
+                        <span className={
+                                booking.status === "pending" 
+                                  ? "text-[#FBBC05] text-center text-base " 
+                                  : "text-green-500 text-center text-base "
+                              }>
+                                {booking.status === "pending" 
+                                  ? "กำลังรอ..." 
+                                  : booking.status === "In_progress" 
+                                    ? "กำลังให้บริการ..." 
+                                    : booking.status}
+                              </span>
                       </p>
                       <button
                         className="font-semibold text-white capitalize bg-[#CC2F22] py-1 px-2 rounded-lg hover:bg-red-700 duration-300 ease-in-out text-sm md:text-base"
@@ -358,9 +363,7 @@ const Queue = () => {
             </div>
 
             <div className="mt-4">
-              <h4 className="text-base md:text-lg font-bold mb-2 text-center md:text-left">
-                ลำดับคิวของช่าง {selectedBooking ? selectedBooking.employee?.first_name : "ยังไม่เลือก"}
-              </h4>
+
               {userBookings.length > 0 && selectedBooking ? (
                 getEmployeeQueue().map((q) => {
                   const queueIndex = getEmployeeQueue().findIndex((item) => item.id === q.id) + 1;
@@ -417,13 +420,18 @@ const Queue = () => {
                         <div className="flex flex-col sm:flex-row justify-between mt-1 gap-2">
                           <p className="text-sm md:text-base font-bold">
                             สถานะ:{" "}
-                            <span
-                              className={
-                                q.status === "pending" ? "text-[#FBBC05]" : "text-green-500"
-                              }
-                            >
-                              {q.status}
-                            </span>
+                            <span className={
+                                q.status === "pending" 
+                                  ? "text-[#FBBC05] text-center text-sm " 
+                                  : "text-green-500 text-center text-sm "
+                              }>
+                                {q.status === "pending" 
+                                  ? "กำลังรอ..." 
+                                  : q.status === "In_progress" 
+                                    ? "กำลังให้บริการ..." 
+                                    : q.status}
+                              </span>
+
                           </p>
                           <p className="text-sm md:text-base font-bold">
                             บริการ: <span className="text-gray-300">{q.service?.name}</span>
