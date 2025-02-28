@@ -27,6 +27,8 @@ import Managment from './Managment.jsx';
 import Dashboard from './Dashboard.jsx';
 import Queue from './Queue.jsx';
 import CircularGallery from './CircularGallery.jsx';
+import Profile from './Profile.jsx';
+
 import ProfilePage from './Profile.jsx';
 import RegisterStep1 from './RegisterStep1.jsx';
 import VerifyOTP from './components/VerifyOTP.jsx';
@@ -125,8 +127,8 @@ const router = createBrowserRouter([
   },
   {
     
-    path: '/Profile', 
-    element: <ProfilePage />,
+    path: '/profile', 
+    element: <Profile />,
   },
   {
     
