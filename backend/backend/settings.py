@@ -194,6 +194,10 @@ CSRF_TRUSTED_ORIGINS = [
 # settings.py
 # BREVO_API_KEY = os.getenv("BREVO_API_KEY")
 # DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
 BREVO_API_KEY = os.getenv('BREVO_API_KEY')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+print("BREVO_API_KEY:", BREVO_API_KEY)
+print("DEFAULT_FROM_EMAIL:", DEFAULT_FROM_EMAIL)
