@@ -5,8 +5,7 @@ from django.contrib.auth.hashers import make_password
 from django.conf import settings
 from bson import ObjectId
 from django.shortcuts import get_object_or_404
-
-
+from .utils import generate_otp
 class MemberSerializers(serializers.Serializer):
     first_name = serializers.CharField(max_length=100)
     last_name = serializers.CharField(max_length=100)
@@ -14,8 +13,9 @@ class MemberSerializers(serializers.Serializer):
     email = serializers.EmailField()
     phone_number = serializers.CharField(max_length=15, required=False, allow_blank=True)
     password = serializers.CharField(write_only=True)
-    role = serializers.CharField(default="user", read_only=True)  # ไม่ให้แก้ไขผ่าน API
+    role = serializers.CharField(default="user", read_only=True)
     profile_image = serializers.CharField(required=False, allow_blank=True)
+    is_verified = serializers.BooleanField(read_only=True)  # เพิ่มฟิลด์นี้
 
     def validate_password(self, value):
         if len(value) < 8:
@@ -23,15 +23,70 @@ class MemberSerializers(serializers.Serializer):
         return value
 
     def create(self, validated_data):
-        # ตัดรหัสผ่านออกจาก validated_data ก่อน
         password = validated_data.pop('password')
-
-        # สร้างสมาชิกใหม่และเข้ารหัสรหัสผ่าน
         member = Member(**validated_data)
-        member.set_password(password)  # ใช้ฟังก์ชัน set_password ของ MongoEngine Document
+        member.set_password(password)
         member.save()
-
         return member
+
+class RegisterStep1Serializer(serializers.Serializer):
+    first_name = serializers.CharField(max_length=100)
+    last_name = serializers.CharField(max_length=100)
+    nick_name = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    email = serializers.EmailField()
+    phone_number = serializers.CharField(max_length=15, required=False, allow_blank=True)
+    password = serializers.CharField(write_only=True)
+
+    def validate_email(self, value):
+        if Member.objects.filter(email=value).count() > 0:
+            raise serializers.ValidationError("This email is already registered.")
+        return value
+
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("Password must be at least 8 characters long")
+        return value
+
+    def create(self, validated_data):
+        # ตัดรหัสผ่านออกจาก validated_data
+        password = validated_data.pop('password')
+        
+        # สร้าง member ชั่วคราว (ยังไม่ยืนยัน)
+        member = Member(**validated_data)
+        member.set_password(password)  # เข้ารหัสรหัสผ่าน
+        member.otp = generate_otp()  # สร้าง OTP (ต้องมีฟังก์ชัน generate_otp)
+        member.is_verified = False  # ยังไม่ยืนยัน
+        member.save()
+        return member
+    
+
+class VerifyOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(max_length=6)
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        otp = attrs.get('otp')
+        
+        try:
+            member = Member.objects.get(email=email)
+            if member.otp != otp:
+                raise serializers.ValidationError("Invalid OTP")
+            if member.is_verified:
+                raise serializers.ValidationError("This account is already verified")
+        except Member.DoesNotExist:
+            raise serializers.ValidationError("User not found")
+        
+        return attrs
+
+    def save(self):
+        email = self.validated_data['email']
+        member = Member.objects.get(email=email)
+        member.otp = None  # ล้าง OTP
+        member.is_verified = True  # อัปเดตสถานะเป็นยืนยันแล้ว
+        member.save()
+        return member
+       
 
 class ServiceSerializer(serializers.Serializer):
     id = serializers.CharField(read_only=True)  # ID จาก MongoDB
