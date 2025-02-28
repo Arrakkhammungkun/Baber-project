@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import EmployeeDetailView, MemberList, RegisterStep1APIView
+from .views import EmployeeDetailView, ForgotPasswordAPIView, MemberList, RegisterStep1APIView, ResetPasswordAPIView, VerifyOTPForgotPasswordAPIView
 
 
 from .views import VerifyOTPAPIView,SendOTPAPIView,DashboardSummaryAPIView,get_booking_queue,ToggleServiceStatusView,get_booked_times,check_availability,delete_booking,complete_booking,confirm_booking,create_booking,LoginAPIView,LoginAdminAPIView,upload_profile,ServiceListView,ServiceDetailView,EmployeeView
@@ -37,4 +37,7 @@ urlpatterns = [
     path('send-otp/',SendOTPAPIView.as_view(),name='send-otp'),
     path('verify-otp/', VerifyOTPAPIView.as_view(), name='verify-otp'),
     path('register/step1/', RegisterStep1APIView.as_view(), name='register-step1'),
+    path('forgot-password/', ForgotPasswordAPIView.as_view(), name='forgot-password'),
+    path('verify-otp-forgot/', VerifyOTPForgotPasswordAPIView.as_view(), name='verify-otp-forgot'),
+    path('reset-password/', ResetPasswordAPIView.as_view(), name='reset-password'),
 ] 

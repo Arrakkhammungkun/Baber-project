@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 const URLSOCKET = import.meta.env.VITE_API_URLSOCKET;
 const apiUrl = import.meta.env.VITE_API_URL;
-
 const apiUrl_img = import.meta.env.VITE_API_IMG;
 import LayoutAdmin from './components/LayoutAdmin';
+
 const Booking_Management = () => {
   const [queue, setQueue] = useState([]);
   const [socket, setSocket] = useState(null);
@@ -86,8 +86,24 @@ const Booking_Management = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleString();
+    return date.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
   };
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString(); // คืนค่าด้วยแค่เวลา
+  };
+
+  // เพิ่มการเรียงลำดับ queue
+  const sortedQueue = [...queue].sort((a, b) => {
+    // เรียง In_progress มาก่อน
+    if (a.status === "In_progress" && b.status !== "In_progress") return -1;
+    if (a.status !== "In_progress" && b.status === "In_progress") return 1;
+    
+    // ถ้าสถานะเหมือนกัน เรียงตาม queue_number + 1
+    const queueA = (a.queue_number !== undefined && a.queue_number !== null ? a.queue_number + 1 : Infinity);
+    const queueB = (b.queue_number !== undefined && b.queue_number !== null ? b.queue_number + 1 : Infinity);
+    return queueA - queueB;
+  });
 
   return (
     <div>
@@ -100,36 +116,56 @@ const Booking_Management = () => {
           </header>
           <div className="max-w-full mx-auto bg-white shadow-md rounded-lg p-4">
             <div className="space-y-4">
-              {Array.isArray(queue) && queue.length > 0 ? (
-                queue.map((q) => (
+              {Array.isArray(sortedQueue) && sortedQueue.length > 0 ? (
+                sortedQueue.map((q) => (
                   <div
                     key={`queue-${q.id}-${q.status}`}
                     className="flex items-start bg-black w-full p-4 mb-2 rounded-l-full rounded-br-[1200rem] shadow-sm"
                   >
-                    <div className="flex items-center">
-                      {q.customer && q.customer.profile ? (
-                        <img
-                          src={`${apiUrl_img}${q.customer.profile}`}
-                          alt="Profile"
-                          className="rounded-full w-32 h-32 object-cover"
-                        />
-                      ) : (
-                        <div className="rounded-full w-32 h-32 object-cover">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
+                    <div className="flex flex-col justify-center">
+                      <div className="flex items-center">
+                        {q.customer && q.customer.profile ? (
+                          <img
+                            src={`${apiUrl_img}${q.customer.profile}`}
+                            alt="Profile"
                             className="rounded-full w-32 h-32 object-cover"
-                            viewBox="0 0 448 512"
-                            fill="currentColor"
-                          >
-                            <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z" />
-                          </svg>
-                        </div>
-                      )}
+                          />
+                        ) : (
+                          <div className="rounded-full w-auto h-auto object-cover bg-white">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="rounded-full w-32 h-32 object-cover mt-1"
+                              viewBox="0 0 448 512"
+                              fill="currentColor"
+                            >
+                              <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      <p className={
+                        q.status === "In_progress" 
+                          ? "text-green-500 text-center text-xs mt-1" 
+                          : (q.status === "pending" 
+                              ? (q.queue_number + 1 === 1 
+                                  ? "text-orange-500 text-center text-xs mt-1" // สีส้มถ้าเป็นคิวแรก
+                                  : "text-yellow-500 text-center text-xs mt-1"  // สีเหลืองถ้าไม่ใช่คิวแรก
+                                )
+                              : "text-green-500 text-center text-xs mt-1" // สีเขียวสำหรับสถานะอื่นๆ
+                            )
+                      }>
+                        {q.status === "pending" 
+                          ? (q.queue_number + 1 === 1 ? "คิวถัดไป..." : "กำลังรอ...")
+                          : q.status === "In_progress" 
+                            ? "กำลังให้บริการ..." 
+                            : q.status
+                        }
+                      </p>
                     </div>
                     <div className="flex flex-col text-white font-medium px-4">
                       <p>
                         คิวที่: {q.queue_number !== undefined && q.queue_number !== null 
-                          ? q.queue_number 
+                          ? q.queue_number + 1
                           : (q.queue_position || "ไม่ระบุ")}
                       </p>
                       <p>
@@ -148,15 +184,14 @@ const Booking_Management = () => {
                           : `${q.service.name}`}
                       </p>
                       <p>
-                        เวลาเริ่ม: {formatDate(q.start_time)}
+                        เวลาเริ่ม: {formatTime(q.start_time)} น.
                       </p>
                       <p>
-                        เวลาเสร็จ: {formatDate(q.end_time)}
+                        เวลาเสร็จ: {formatTime(q.end_time)} น.
                       </p>
-                      <p className="">สถานะ: {q.status}</p>
                     </div>
                     <div className="flex space-x-3 ml-auto pt-0 items-start justify-end">
-                      {q.status === "pending" && (
+                      {q.status === "pending" && q.queue_number === 0 && (
                         <button
                           className="w-full md:w-32 py-4 bg-[#dfdc5f] text-white text-sm rounded-md hover:bg-[#cfcd5b]"
                           onClick={() => handleConfirmQueue(q.id)}
