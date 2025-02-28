@@ -1,6 +1,7 @@
 from django.shortcuts import render
+import sib_api_v3_sdk
 from .models import Booking, Employee, Member,Service,DashboardSummary,update_dashboard_summary,update_top_services
-from .serializers import RegisterStep1Serializer, TopServiceSerializer,BookingSerializer, EmployeeSerializer, MemberSerializers,ServiceSerializer,DashboardSummarySerializer, VerifyOTPSerializer
+from .serializers import ForgotPasswordSerializer, RegisterStep1Serializer, ResetPasswordSerializer, TopServiceSerializer,BookingSerializer, EmployeeSerializer, MemberSerializers,ServiceSerializer,DashboardSummarySerializer, VerifyOTPForgotPasswordSerializer, VerifyOTPSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -102,10 +103,10 @@ class RegisterStep1APIView(APIView):
             configuration.api_key['api-key'] = settings.BREVO_API_KEY
             api_instance = TransactionalEmailsApi(ApiClient(configuration))
             send_smtp_email = SendSmtpEmail(
-                sender={"name": "Barber Shop", "email": settings.DEFAULT_FROM_EMAIL},
+                sender={"name": "University of Phayao", "email": settings.DEFAULT_FROM_EMAIL},
                 to=[{"email": member.email}],
-                subject="รหัส OTP ของคุณ",
-                text_content=f"รหัสยืนยันตัวตนของคุณคือ {member.otp}. มีอายุการใช้งาน 10 นาที."
+                subject="Your OTP",
+                text_content=f"Your OTP code is {member.otp}. It is valid for 10 minutes."
             )
             api_instance.send_transac_email(send_smtp_email)
             return Response({"message": "OTP sent to your email"}, status=status.HTTP_200_OK)
@@ -168,6 +169,67 @@ class LoginAPIView(APIView):
                 return Response({"message": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
         except Member.DoesNotExist:
             return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ForgotPasswordAPIView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        serializer = ForgotPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            try:
+                member = Member.objects.get(email=email)
+                member.otp = generate_otp()
+                member.save()
+
+                if not settings.BREVO_API_KEY:
+                    return Response({"message": "Brevo API Key is not configured"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+                configuration = Configuration()
+                configuration.api_key['api-key'] = settings.BREVO_API_KEY
+                api_instance = TransactionalEmailsApi(ApiClient(configuration))
+                send_smtp_email = SendSmtpEmail(
+                    sender={"name": "University of Phayao", "email": settings.DEFAULT_FROM_EMAIL},
+                    to=[{"email": email}],
+                    subject="Your OTP for Password Reset",
+                    text_content=f"Your OTP code is {member.otp}. It is valid for 10 minutes."
+                )
+                api_instance.send_transac_email(send_smtp_email)
+
+                return Response({"message": "OTP sent to your email"}, status=status.HTTP_200_OK)
+            except Member.DoesNotExist:
+                return Response({"message": "Email not found"}, status=status.HTTP_404_NOT_FOUND)
+            except sib_api_v3_sdk.rest.ApiException as e:
+                return Response({"message": f"Failed to send email: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except Exception as e:
+                return Response({"message": f"Unexpected error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class VerifyOTPForgotPasswordAPIView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        serializer = VerifyOTPForgotPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            member = serializer.save()
+            return Response({"message": "Password updated successfully"}, status=status.HTTP_200_OK)
+        errors = serializer.errors
+        detailed_errors = {field: errors[field][0] for field in errors}
+        return Response({"message": "Verification failed", "errors": detailed_errors}, status=status.HTTP_400_BAD_REQUEST)   
+
+class ResetPasswordAPIView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            member = serializer.save()
+            return Response({"message": "Password updated successfully"}, status=status.HTTP_200_OK)
+        errors = serializer.errors
+        detailed_errors = {field: errors[field][0] for field in errors}
+        return Response({"message": "Reset failed", "errors": detailed_errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class LoginAdminAPIView(APIView):
@@ -262,12 +324,14 @@ def update_name(request):
         member = Member.objects.get(id=payload['user_id'])
         first_name = request.data.get('first_name')
         last_name = request.data.get('last_name')
+        nick_name = request.data.get('nick_name')
 
         if not first_name or not last_name:
             return Response({"message": "First name and last name are required"}, status=status.HTTP_400_BAD_REQUEST)
 
         member.first_name = first_name
         member.last_name = last_name
+        member.nick_name =nick_name
         member.save()
 
         return Response({

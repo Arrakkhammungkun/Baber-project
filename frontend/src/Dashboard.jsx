@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
-import LayoutAdmin from "./components/LayoutAdmin";
-import axios from "axios";
+import LayoutAdmin from './components/LayoutAdmin';
+import axios from 'axios';
+import Loader from "./components/Loader";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const Dashboard = () => {
@@ -135,7 +136,7 @@ const Dashboard = () => {
     fetchDashboardSummary({ period: "today" });
   }, []);
 
-  if (!summary) return <div>Loading...</div>;
+   if (!summary) return <div><Loader></Loader></div>;
 
   return (
     <LayoutAdmin>
@@ -197,59 +198,37 @@ const Dashboard = () => {
           <style>{`input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }`}</style>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
-            {[
-              {
-                title: "New Booking",
-                value: summary.bookings_today,
-                img: "appointment.png",
-              },
-              // เปลี่ยนจาก In Progress เป็น Cancelled
-              {
-                title: "Customers Served",
-                value: summary.served_customers,
-                img: "income.png",
-              },
-              {
-                title: "Cancelled",
-                value: summary.cancelled_count,
-                img: "cancel.png",
-              },
-              {
-                title: "Daily Revenue",
-                value: summary.revenue_day,
-                img: "money.png",
-              }, // ปรับชื่อรูปภาพให้เหมาะสม
-            ].map((card, index) => (
-              <div
-                key={index}
-                className="bg-[#242529] p-4 rounded-lg shadow-xl"
-              >
-                <div className="flex items-center justify-between border-b border-white pb-4">
-                  <div>
-                    <p className="font-bold text-white uppercase">
-                      {card.title}
-                    </p>
-                    <span className="text-2xl font-semibold mt-2 text-white">
-                      {card.value}
-                    </span>
-                  </div>
-                  <div className="bg-gradient-to-b from-slate-100 to-slate-300 shadow-md shadow-slate-800 w-12 h-12 items-center flex justify-center rounded-lg">
-                    <span
-                      className={`inline-block w-10 h-10 bg-[url(/src/img/${card.img})] bg-cover`}
-                    ></span>
-                  </div>
+          {[
+            { title: "New Booking", value: summary.bookings_today, img: "/src/img/appointment.png" },
+            { title: "Customers Served", value: summary.served_customers, img: "/src/img/income.png" },
+            { title: "Cancelled", value: summary.cancelled_count, img: "/src/img/cancel.png" },
+            { title: "Daily Revenue", value: summary.revenue_day, img: "/src/img/income.png" },
+          ].map((card, index) => (
+            <div key={index} className="bg-[#242529] p-4 rounded-lg shadow-xl">
+              <div className="flex items-center justify-between border-b border-white pb-4">
+                <div>
+                  <p className="font-bold text-white uppercase">{card.title}</p>
+                  <span className="text-2xl font-semibold mt-2 text-white">{card.value}</span>
                 </div>
-                <div className="flex items-center mt-4">
-                  <span className="inline-block w-10 h-10 mr-2 bg-[url(/src/img/time-count.png)] bg-cover"></span>
-                  <button
-                    className="font-semibold text-white capitalize hover:underline"
-                    onClick={handleUpdateNow}
-                  >
-                    update now
-                  </button>
-                </div>
+                <div
+                  className="bg-gradient-to-b bg-white from-slate-100 to-slate-300 shadow-md shadow-slate-800 w-12 h-12 flex items-center justify-center rounded-lg"
+                  style={{ backgroundImage: `url(${card.img})`, backgroundSize: 'cover' }}
+                ></div>
               </div>
-            ))}
+              <div className="flex items-center mt-4">
+                <div
+                  className="inline-block w-10 h-10 mr-2"
+                  style={{ backgroundImage: `url(/src/img/time-count.png)`, backgroundSize: 'cover' }}
+                ></div>
+                <button
+                  className="font-semibold text-white capitalize hover:underline"
+                  onClick={handleUpdateNow}
+                >
+                  update now
+                </button>
+              </div>
+            </div>
+          ))}
           </div>
 
           <div className="my-8">

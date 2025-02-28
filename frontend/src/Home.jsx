@@ -223,7 +223,8 @@ function Home() {
         </div>
       </Layout>
 
-      <style jsx>{`
+      {/* ลบ jsx ออก */}
+      <style>{`
         @keyframes slideFromRight {
           0% {
             transform: translateX(-100%);

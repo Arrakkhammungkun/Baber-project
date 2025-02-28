@@ -86,7 +86,60 @@ class VerifyOTPSerializer(serializers.Serializer):
         member.is_verified = True  # อัปเดตสถานะเป็นยืนยันแล้ว
         member.save()
         return member
-       
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not Member.objects.filter(email=value).count() > 0:
+            raise serializers.ValidationError("This email is not registered.")
+        return value
+
+class VerifyOTPForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(max_length=6)
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        otp = attrs.get('otp')
+        try:
+            member = Member.objects.get(email=email)
+            if str(member.otp).strip() != str(otp).strip():  # แปลงเป็น string และตัด whitespace
+                raise serializers.ValidationError("Invalid OTP")
+            if member.is_verified is False:
+                raise serializers.ValidationError("Account is not verified")
+        except Member.DoesNotExist:
+            raise serializers.ValidationError("User not found")
+        return attrs
+
+    def save(self):
+        # ไม่ต้องอัปเดต password ที่นี่
+        email = self.validated_data['email']
+        member = Member.objects.get(email=email)
+        member.otp = None  # ล้าง OTP
+        member.save()
+        return member 
+# api/serializers.py
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate_email(self, value):
+        if not Member.objects.filter(email=value).count() > 0:
+            raise serializers.ValidationError("Email not found")
+        return value
+
+    def save(self):
+        email = self.validated_data['email']
+        password = self.validated_data['password']
+        member = Member.objects.get(email=email)
+        member.set_password(password)
+        member.otp = None
+        member.save()
+        return member
+
+
+
 
 class ServiceSerializer(serializers.Serializer):
     id = serializers.CharField(read_only=True)  # ID จาก MongoDB

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "./contexts/AuthContext";
 import axios from "axios";
+import Layout from "./components/Layout";
 const apiUrl = import.meta.env.VITE_API_URL;
 const apiUrl_img = import.meta.env.VITE_API_IMG;
 
@@ -116,10 +117,11 @@ const ProfilePage = () => {
   };
 
   return (
+    <Layout >
     <div className="bg-[url(/src/img/welcome.jpg)] bg-cover bg-center min-h-screen flex items-center justify-center p-4">
       <div className="container mx-auto max-w-7xl w-full">
         <header className="mb-6 sm:mb-8 md:mb-12 lg:mb-16 px-4">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white p-2">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white p-2 mt-14">
             Profile
           </h1>
           <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white p-2 pb-5 capitalize">
@@ -128,7 +130,7 @@ const ProfilePage = () => {
           <hr className="bg-white border-white border-2 w-full" />
         </header>
 
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 md:gap-10 justify-center items-center min-h-[calc(100vh-200px)] relative">
+        <div className="flex flex-col mt-[-6rem] lg:flex-row gap-4 sm:gap-6 md:gap-10 justify-center items-center min-h-[calc(100vh-200px)] relative">
           <div className="hidden sm:block absolute left-0 top-1/2 -translate-y-1/2 pl-2 sm:pl-4">
             <div className="flex flex-col items-center justify-center">
               {["S", "T", "Y", "L", "E", "X"].map((char, index) => (
@@ -271,7 +273,12 @@ const ProfilePage = () => {
         </div>
       </div>
     </div>
+    <div className="">
+
+    </div>
+    </Layout>
   );
+  
 };
 
 export default ProfilePage;

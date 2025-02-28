@@ -7,32 +7,34 @@ import {
   RouterProvider,
   useMatch,
 } from "react-router-dom";
-import Home from "./Home.jsx";
-import Register from "./Register.jsx";
-import Login from "./Login.jsx";
-import Forgot_password from "./Forgot_password.jsx";
-import { AuthProvider } from "./contexts/AuthContext.jsx";
-import Login_admin from "./Login_admin.jsx";
-import AddServiceForm from "./components/AddServiceForm.jsx";
-import Add_Service from "./Add_Service.jsx";
-import EditServiceForm from "./components/EditServiceForm.jsx";
-import Bookingbarber from "./Bookingbarber.jsx"; //
-import Manage_Employee from "./Manage_Employee.jsx";
-import BookingForm from "./components/BookingForm.jsx";
-import Booking_Management from "./Booking_Management.jsx";
-import Booking from "./Test.jsx";
-import AdminQueueStatus from "./AdminQueueStatus.jsx";
-import Test_service from "./Test_servie.jsx";
-import Managment from "./Managment.jsx";
-import Dashboard from "./Dashboard.jsx";
-import Queue from "./Queue.jsx";
-import CircularGallery from "./CircularGallery.jsx";
-import Profile from "./Profile.jsx";
-
-import ProfilePage from "./Profile.jsx";
-import RegisterStep1 from "./RegisterStep1.jsx";
-import VerifyOTP from "./components/VerifyOTP.jsx";
+import Home from './Home.jsx';
+import Register from './Register.jsx';
+import Login from './Login.jsx';
+import ForgotPassword from './ForgotPassword.jsx';
+import { AuthProvider } from './contexts/AuthContext.jsx';
+import Login_admin from './Login_admin.jsx';
+import AddServiceForm from './components/AddServiceForm.jsx';
+import Add_Service from './Add_Service.jsx';
+import EditServiceForm from './components/EditServiceForm.jsx';
+import Bookingbarber from './Bookingbarber.jsx'; //
+import Manage_Employee from './Manage_Employee.jsx';
+import BookingForm from './components/BookingForm.jsx';
+import Booking_Management from './Booking_Management.jsx';
+import Booking from './Test.jsx';
+import AdminQueueStatus from './AdminQueueStatus.jsx';
+import Test_service from './Test_servie.jsx';
+import Managment from './Managment.jsx';
+import Dashboard from './Dashboard.jsx';
+import Queue from './Queue.jsx';
+import CircularGallery from './CircularGallery.jsx';
+import Profile from './Profile.jsx';
+import ResetPassword from './components/ResetPassword.jsx';
+import ResetSuccess from './components/ResetSuccess.jsx';
+import ProfilePage from './Profile.jsx';
+import RegisterStep1 from './RegisterStep1.jsx';
+import VerifyOTP from './components/VerifyOTP.jsx';
 // import ProtectedRoute from './components/ProtectedRoute.jsx';
+import VerifyOTPForget from './components/VerifyOTPForget.jsx';
 
 const router = createBrowserRouter([
   {
@@ -116,8 +118,9 @@ const router = createBrowserRouter([
     element: <CircularGallery />,
   },
   {
-    path: "/forgot_password",
-    element: <Forgot_password />,
+    
+    path: '/forgot_password', 
+    element: <ForgotPassword />,
   },
   {
     path: "/profile",
@@ -131,6 +134,24 @@ const router = createBrowserRouter([
     path: "/verify-otp",
     element: <VerifyOTP />,
   },
+  {
+    
+    path: '/verify-otp2', 
+    element: <VerifyOTPForget  />,
+  },
+  {
+    
+    path: '/reset-password', 
+    element: <ResetPassword />,
+  },
+  {
+    
+    path: '/reset-success', 
+    element: <ResetSuccess/>,
+  },
+  
+  
+
 ]);
 
 createRoot(document.getElementById("root")).render(

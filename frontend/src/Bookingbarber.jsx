@@ -173,9 +173,8 @@ const Bookingbarber = () => {
   const convertDateToThaiFormat = (dateString) => {
     const date = dayjs(dateString, "DD MMMM YYYY", "en");
 
-    return date.isValid()
-      ? date.format("DD/MM/YYYY")
-      : "รูปแบบวันที่ไม่ถูกต้อง";
+
+    return date.isValid() ? date.format("DD/MM/YYYY") : "รูปแบบวันที่ไม่ถูกต้อง";
   };
   const selectedTimeFormatted = dayjs(
     `${selectedDate.format("YYYY-MM-DD")} ${selectedTimeText
