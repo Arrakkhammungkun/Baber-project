@@ -42,6 +42,10 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('admin', JSON.stringify(adminData));
     localStorage.setItem('adminToken', adminTokenData);
   };
+  const fetchUser = (userData) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+  }
   const logoutUser = () => {
     setUser(null);
     setToken(null);
@@ -64,7 +68,7 @@ export const AuthProvider = ({ children }) => {
 
   };
   return (
-    <AuthContext.Provider value={{ user, token, login, logout,loading,login_Admin,adminToken,admin,logoutAdmin }}>
+    <AuthContext.Provider value={{ user, token, login, logout,loading,login_Admin,adminToken,admin,logoutAdmin,fetchUser }}>
       {children}
     </AuthContext.Provider>
   );
