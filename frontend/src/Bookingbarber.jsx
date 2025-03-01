@@ -10,6 +10,7 @@ import utc from "dayjs/plugin/utc";
 import { useAuth } from "./contexts/AuthContext";
 import timezone from "dayjs/plugin/timezone";
 import "dayjs/locale/th";
+import { useNavigate } from "react-router-dom";
 const Bookingbarber = () => {
   dayjs.extend(utc);
   dayjs.extend(timezone);
@@ -17,8 +18,8 @@ const Bookingbarber = () => {
   // ตั้งค่า locale เป็นภาษาไทย
   dayjs.locale("th");
   const { token, user } = useAuth();
-
-  console.log("User ", user || "ไม่มีlogin");
+  const navigate = useNavigate();
+  
 
   const { serviceId } = useParams();
   const [employees, setEmployees] = useState([]);
@@ -242,6 +243,7 @@ const Bookingbarber = () => {
         title: "กรุณา login",
         confirmButtonText: "ตกลง",
       });
+      navigate('/login')
       setIsLoading(false);
       return;
     }
@@ -297,7 +299,7 @@ const Bookingbarber = () => {
         title: "Booking successful!",
         confirmButtonText: "ตกลง",
       });
-      console.log("booking", bookingData);
+      
 
       setBookedTimes((prevBookedTimes) => [
         ...prevBookedTimes,

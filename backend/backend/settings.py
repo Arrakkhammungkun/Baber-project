@@ -178,14 +178,27 @@ MEDIA_URL = '/media/'
 
 
 ASGI_APPLICATION = "api.asgi.application"  # ชื่อโปรเจค
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",  # ใช้ in-memory สำหรับทดสอบ
+#         'CONFIG': {
+#             "hosts": [('127.0.0.1', 6379)],  # ตั้งค่า Redis 
+#         },
+#     },
+# }
+import os
+
+
+
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",  # ใช้ in-memory สำหรับทดสอบ
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],  # ตั้งค่า Redis 
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.getenv("REDIS_URL", "redis://:6SjSMLTMUZX7M7rtrjhwdwxVAXJ9GCGt@redis-11223.c292.ap-southeast-1-1.ec2.redns.redis-cloud.com:11223/0")],
         },
     },
 }
+
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
@@ -194,6 +207,10 @@ CSRF_TRUSTED_ORIGINS = [
 # settings.py
 # BREVO_API_KEY = os.getenv("BREVO_API_KEY")
 # DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
 BREVO_API_KEY = os.getenv('BREVO_API_KEY')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+print("BREVO_API_KEY:", BREVO_API_KEY)
+print("DEFAULT_FROM_EMAIL:", DEFAULT_FROM_EMAIL)
