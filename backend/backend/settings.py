@@ -177,7 +177,7 @@ MEDIA_URL = '/media/'
 
 
 
-ASGI_APPLICATION = "api.asgi.application"  # ชื่อโปรเจค
+ASGI_APPLICATION = "backend.asgi.application"  # เปลี่ยนจาก "api.asgi.application" # ชื่อโปรเจค
 # CHANNEL_LAYERS = {
 #     "default": {
 #         "BACKEND": "channels_redis.core.RedisChannelLayer",  # ใช้ in-memory สำหรับทดสอบ
@@ -194,7 +194,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [os.getenv("REDIS_URL", "redis://:6SjSMLTMUZX7M7rtrjhwdwxVAXJ9GCGt@redis-11223.c292.ap-southeast-1-1.ec2.redns.redis-cloud.com:11223/0")],
+            "hosts": [os.getenv("REDIS_URL", "redis://localhost:6379")],
         },
     },
 }
@@ -212,5 +212,5 @@ from dotenv import load_dotenv
 load_dotenv()
 BREVO_API_KEY = os.getenv('BREVO_API_KEY')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
-print("BREVO_API_KEY:", BREVO_API_KEY)
-print("DEFAULT_FROM_EMAIL:", DEFAULT_FROM_EMAIL)
+
+ALLOWED_HOSTS = ['*']
