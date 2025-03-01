@@ -1,12 +1,12 @@
-Django==5.1.2            # Django framework
-mongoengine==0.29.1      # MongoDB ORM
-python-decouple==3.8     # Environment variables
-channels==4.2.0          # WebSocket support
-channels-redis==4.2.1    # Redis for Channels
-gunicorn==23.0.0         # WSGI server for Render
-django-cors-headers==4.6.0  # CORS support
-djangorestframework==3.15.2 # REST API (ถ้าใช้)
-daphne==4.1.2            # ASGI server (ถ้าใช้ WebSocket)
-redis==5.2.1             # Redis client (ถ้าใช้ redis-py นอก channels)
-pymongo==4.10.1 
-python-dotenv==1.0.1         # MongoDB driver (mongoengine ต้องการ)
+Django==5.1.2
+mongoengine==0.29.1
+python-decouple==3.8
+channels==4.2.0
+channels-redis==4.2.1
+daphne==4.1.2
+django-cors-headers==4.6.0
+djangorestframework==3.15.2
+redis==5.2.1
+pymongo==4.10.1
+python-dotenv==1.0.1
+sib-api-v3-sdk==7.6.0
