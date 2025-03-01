@@ -8,4 +8,5 @@ django-cors-headers==4.6.0  # CORS support
 djangorestframework==3.15.2 # REST API (ถ้าใช้)
 daphne==4.1.2            # ASGI server (ถ้าใช้ WebSocket)
 redis==5.2.1             # Redis client (ถ้าใช้ redis-py นอก channels)
-pymongo==4.10.1          # MongoDB driver (mongoengine ต้องการ)
+pymongo==4.10.1 
+python-dotenv==1.0.1         # MongoDB driver (mongoengine ต้องการ)
