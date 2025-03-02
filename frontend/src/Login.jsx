@@ -35,7 +35,7 @@ const Login = () => {
 
         login(user, token);
 
-        console.log("Login successful:", user, token);
+        
 
         window.location.href = '/';
       }

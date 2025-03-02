@@ -21,7 +21,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (user) {
-      console.log("Profile data:", user);
+      
       setName(user.nick_name || "");
       setFirstName(user.first_name || "");
       setLastName(user.last_name || "");
@@ -33,7 +33,7 @@ const ProfilePage = () => {
   const handleImageChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
-      console.log("Selected file:", selectedFile);
+      
       setFile(selectedFile);
       setFileUrl(URL.createObjectURL(selectedFile));
     }
@@ -55,7 +55,7 @@ const ProfilePage = () => {
     formData.append("last_name", last_name);
     if (file) {
       formData.append("profile_image", file);
-      console.log("File before sending:", file);
+      
     }
 
     try {
@@ -65,7 +65,7 @@ const ProfilePage = () => {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log("Profile updated successfully:", response.data);
+     
       const { user: updatedUser } = response.data;
       setName(updatedUser.nick_name || "");
       setFirstName(updatedUser.first_name || "");

@@ -199,10 +199,10 @@ const Dashboard = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
           {[
-            { title: "New Booking", value: summary.bookings_today, img: "/src/img/appointment.png" },
-            { title: "Customers Served", value: summary.served_customers, img: "/src/img/income.png" },
-            { title: "Cancelled", value: summary.cancelled_count, img: "/src/img/cancel.png" },
-            { title: "Daily Revenue", value: summary.revenue_day, img: "/src/img/income.png" },
+            { title: "New Booking", value: summary.bookings_today, img: "/img/appointment.png" },
+            { title: "Customers Served", value: summary.served_customers, img: "/img/income.png" },
+            { title: "Cancelled", value: summary.cancelled_count, img: "/img/cancel.png" },
+            { title: "Daily Revenue", value: summary.revenue_day, img: "/img/income.png" },
           ].map((card, index) => (
             <div key={index} className="bg-[#242529] p-4 rounded-lg shadow-xl">
               <div className="flex items-center justify-between border-b border-white pb-4">
