@@ -90,7 +90,7 @@ const Test_service = () => {
             {services.map((service) => (
               <div
                 key={service.id}
-                className="bg-black shadow-md rounded-2xl border p-4 mx-auto max-w-4xl flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-5 transition duration-300 hover:-translate-y-3 hover:shadow-lg cursor-pointer"
+                className="bg-black shadow-md rounded-2xl border p-4 mx-auto max-w-6xl flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-5 transition duration-300 hover:-translate-y-3 hover:shadow-lg cursor-pointer"
               >
                 {/* Image */}
                 <div className="w-full sm:w-40 md:w-48 flex-shrink-0">

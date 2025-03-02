@@ -192,9 +192,12 @@ const Navbar = () => {
           </div>
 
           <div className="flex flex-col items-center space-y-6 mt-2 h-full bg-white min-h-min">
+          {(token || adminToken) && (
             <a href="/Profile" className="text-black text-lg hover:text-gray-500">
               บัญชี
             </a>
+            )}
+
             <a href="/" className="text-black text-lg hover:text-gray-500">
               หน้าหลัก
             </a>
