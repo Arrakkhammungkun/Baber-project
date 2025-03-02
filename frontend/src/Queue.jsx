@@ -4,7 +4,9 @@ const URLSOCKET = import.meta.env.VITE_API_URLSOCKET;
 const apiUrl = import.meta.env.VITE_API_URL;
 const apiUrl_img = import.meta.env.VITE_API_IMG;
 import Layout from "./components/Layout";
-
+const newSocket = new WebSocket(`${URLSOCKET}/ws/queue/`);
+newSocket.onopen = () => console.log("WebSocket connected");
+newSocket.onerror = (error) => console.log("WebSocket error:", error);
 const Queue = () => {
   const { token, user } = useAuth();
   const [queue, setQueue] = useState([]);
