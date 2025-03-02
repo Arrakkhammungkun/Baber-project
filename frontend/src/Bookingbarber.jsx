@@ -11,20 +11,17 @@ import { useAuth } from "./contexts/AuthContext";
 import timezone from "dayjs/plugin/timezone";
 import "dayjs/locale/th";
 import { useNavigate } from "react-router-dom";
+
 const Bookingbarber = () => {
   dayjs.extend(utc);
   dayjs.extend(timezone);
-
-  // ตั้งค่า locale เป็นภาษาไทย
   dayjs.locale("th");
+
   const { token, user } = useAuth();
   const navigate = useNavigate();
-  
-
   const { serviceId } = useParams();
   const [employees, setEmployees] = useState([]);
   const [selectedDate, setSelectedDate] = useState(dayjs());
-  // eslint-disable-next-line no-unused-vars
   const [selectedTime, setSelectedTime] = useState(null);
   const [selectedTimeText, setSelectedTimeText] = useState("");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
@@ -57,16 +54,17 @@ const Bookingbarber = () => {
       });
       return;
     }
-
     setIsLoading(true);
     setTimeout(() => {
       setShowModal(true);
       setIsLoading(false);
     }, 500);
   };
+
   const cancelBooking = () => {
     setShowModal(false);
   };
+
   useEffect(() => {
     if (selectedDate && selectedEmployeeId) {
       axios
@@ -76,14 +74,10 @@ const Bookingbarber = () => {
           )}/`
         )
         .then((response) => {
-          console.log("Fetched data:", response.data);
-
           setBookedTimes(response.data.booked_times);
-
           const filteredAvailableTimes = response.data.available_times.filter(
             (time) => !response.data.booked_times.includes(time)
           );
-
           setAvailableTimes(filteredAvailableTimes);
         })
         .catch((error) => console.error("Error fetching bookings:", error));
@@ -103,25 +97,20 @@ const Bookingbarber = () => {
   const isPastTime = (time, date) => {
     const selectedDateTime = dayjs(`${date} ${time}`, "YYYY-MM-DD h:mm A");
     const currentDateTime = dayjs();
-
     return selectedDateTime.isBefore(currentDateTime, "minute");
   };
 
   const calculateAge = (dob) => {
     const birthDate = new Date(dob);
     const today = new Date();
-
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    //
     if (
       monthDiff < 0 ||
       (monthDiff === 0 && today.getDate() < birthDate.getDate())
     ) {
       age--;
     }
-
     return age;
   };
 
@@ -152,7 +141,6 @@ const Bookingbarber = () => {
     axios
       .get(`${apiUrl}/employee/`)
       .then((response) => {
-        // กรองเฉพาะพนักงานที่สถานะเป็น "Active"
         const activeEmployees = response.data.filter(
           (employee) => employee.status === "Active"
         );
@@ -167,16 +155,15 @@ const Bookingbarber = () => {
     axios
       .get(`${apiUrl}/services/${serviceId}/`)
       .then((response) => setService(response.data))
-      .catch((error) => console.error("Error fetching employees:", error))
+      .catch((error) => console.error("Error fetching service:", error))
       .finally(() => setIsLoading(false));
   }, [serviceId]);
 
   const convertDateToThaiFormat = (dateString) => {
     const date = dayjs(dateString, "DD MMMM YYYY", "en");
-
-
     return date.isValid() ? date.format("DD/MM/YYYY") : "รูปแบบวันที่ไม่ถูกต้อง";
   };
+
   const selectedTimeFormatted = dayjs(
     `${selectedDate.format("YYYY-MM-DD")} ${selectedTimeText
       .replace("Selected Time: ", "")
@@ -187,49 +174,31 @@ const Bookingbarber = () => {
     .local()
     .format("YYYY-MM-DDTHH:mm:ss[Z]");
 
-  // const selectedTimeFormatted = dayjs(
-  //   `${selectedDate.format("YYYY-MM-DD")} ${selectedTimeText.replace("Selected Time: ", "").trim()}`,
-  //   "YYYY-MM-DD h:mm A"
-  // ).local().utc().format("YYYY-MM-DDTHH:mm:ss[Z]");
-
-  // const selectedTimeFormatted = dayjs(
-  //   `${selectedDate.format("YYYY-MM-DD")} ${selectedTimeText.replace("Selected Time: ", "").trim()}`,
-  //   "YYYY-MM-DD h:mm A"
-  // ).local().utc().format("YYYY-MM-DDTHH:mm:ss[Z]"); // ส่งเวลาใน UTC
-
   const convertToThaiTime = (time) => {
     const [hour, minute, period] = time.match(/(\d+):(\d+) (\w+)/).slice(1);
     let thaiHour = parseInt(hour, 10);
-
     if (period === "PM" && thaiHour !== 12) {
       thaiHour += 12;
     } else if (period === "AM" && thaiHour === 12) {
       thaiHour = 0;
     }
-
     return `${thaiHour}:${minute} น.`;
   };
 
   const formatTime = (timeString) => {
     if (!timeString) return "ยังไม่เลือก";
-
     let cleanTime = timeString.replace("Selected Time", "").trim();
-
     let match = cleanTime.match(/(\d{1,2}):(\d{2})\s?(AM|PM)/);
-
     if (!match) return "รูปแบบเวลาไม่ถูกต้อง";
-
     let [, hours, minutes, period] = match;
     hours = parseInt(hours, 10);
     minutes = parseInt(minutes, 10);
-
     if (period === "PM" && hours !== 12) {
       hours += 12;
     }
     if (period === "AM" && hours === 12) {
       hours = 0;
     }
-
     return `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
       .padStart(2, "0")} น`;
@@ -243,11 +212,10 @@ const Bookingbarber = () => {
         title: "กรุณา login",
         confirmButtonText: "ตกลง",
       });
-      navigate('/login')
+      navigate("/login");
       setIsLoading(false);
       return;
     }
-
     if (!selectedEmployeeId || !selectedTimeText) {
       Swal.fire({
         icon: "warning",
@@ -257,7 +225,6 @@ const Bookingbarber = () => {
       setIsLoading(false);
       return;
     }
-
     if (
       isPastTime(
         selectedTimeText.replace("Selected Time: ", ""),
@@ -272,7 +239,6 @@ const Bookingbarber = () => {
       setIsLoading(false);
       return;
     }
-
     if (isBooked(selectedTimeText.replace("Selected Time: ", ""))) {
       Swal.fire({
         icon: "error",
@@ -282,7 +248,6 @@ const Bookingbarber = () => {
       setIsLoading(false);
       return;
     }
-
     const bookingData = {
       customer: user.user_id,
       service: serviceId,
@@ -290,23 +255,17 @@ const Bookingbarber = () => {
       date: selectedDate.format("YYYY-MM-DD"),
       start_time: selectedTimeFormatted,
     };
-    console.log(selectedTimeFormatted);
     try {
       const response = await axios.post(`${apiUrl}/bookings/`, bookingData);
-      console.log("Booking successful:", response.data);
       Swal.fire({
         icon: "success",
         title: "Booking successful!",
         confirmButtonText: "ตกลง",
       });
-      
-
       setBookedTimes((prevBookedTimes) => [
         ...prevBookedTimes,
         selectedTimeText.replace("Selected Time: ", ""),
       ]);
-
-      // อัพเดท availableTimes
       const filteredAvailableTimes = availableTimes.filter(
         (time) => time !== selectedTimeText.replace("Selected Time: ", "")
       );
@@ -330,29 +289,27 @@ const Bookingbarber = () => {
       <Layout>
         {isLoading && <Loader />}
         {showModal && (
-          <div className="fixed inset-0 z-50 bg-gray-500 bg-opacity-50 flex items-center justify-center px-4">
-            <div className="bg-white text-black p-6 rounded-xl w-full max-w-2xl">
-              <h2 className="text-2xl font-bold mb-4 text-center">
+          <div className="fixed inset-0 z-50 bg-gray-500 bg-opacity-50 flex items-center justify-center px-2 sm:px-4">
+            <div className="bg-white text-black p-4 sm:p-6 rounded-xl w-full max-w-[90vw] sm:max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 text-center">
                 สรุปข้อมูลการจอง
               </h2>
               <hr />
-
-              <p className="text-lg font-bold mt-2">รายการที่เลือก</p>
-              <div className="text-base text-black mt-1 p-2">
+              <p className="text-base sm:text-lg font-bold mt-2">รายการที่เลือก</p>
+              <div className="text-sm sm:text-base text-black mt-1 p-2">
                 {/* Section บริการ */}
                 <div className="flex flex-col sm:flex-row items-start gap-4">
                   <div
-                    className="w-24 h-24 bg-cover bg-center rounded-lg"
+                    className="w-20 h-20 sm:w-24 sm:h-24 bg-cover bg-center rounded-lg flex-shrink-0"
                     style={{ backgroundImage: `url(${Service.image_url})` }}
                   ></div>
                   <div>
                     <p>
-                      <strong>บริการ:</strong>{" "}
-                      {Service ? `${Service.name} ` : "ยังไม่เลือก"}
+                      <strong>บริการ:</strong> {Service ? `${Service.name}` : "ยังไม่เลือก"}
                     </p>
                     <p className="mt-1">
                       <strong>รายละเอียด:</strong>{" "}
-                      {Service ? `${Service.description} ` : "ยังไม่เลือก"}
+                      {Service ? `${Service.description}` : "ยังไม่เลือก"}
                     </p>
                   </div>
                 </div>
@@ -360,9 +317,9 @@ const Bookingbarber = () => {
                 {/* Section พนักงาน */}
                 <div className="flex flex-col sm:flex-row items-start gap-4 mt-4">
                   <div
-                    className="w-24 h-24 bg-cover bg-center rounded-lg"
+                    className="w-20 h-20 sm:w-24 sm:h-24 bg-cover bg-center rounded-lg flex-shrink-0"
                     style={{
-                      backgroundImage: `url(${selectedEmployeeId.employee_image_url})`,
+                      backgroundImage: `url(${selectedEmployeeId?.employee_image_url})`,
                     }}
                   ></div>
                   <div>
@@ -374,17 +331,12 @@ const Bookingbarber = () => {
                     </p>
                     <p>
                       <strong>ชื่อเล่น:</strong>{" "}
-                      {selectedEmployeeId
-                        ? `${selectedEmployeeId.nickname} `
-                        : "ยังไม่เลือก"}
+                      {selectedEmployeeId ? `${selectedEmployeeId.nickname}` : "ยังไม่เลือก"}
                     </p>
-
-                    <div className="flex gap-4 text-base mt-1">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm sm:text-base mt-1">
                       <p>
                         <strong>เพศ:</strong>{" "}
-                        {selectedEmployeeId
-                          ? `${selectedEmployeeId.gender}`
-                          : "ยังไม่เลือก"}
+                        {selectedEmployeeId ? `${selectedEmployeeId.gender}` : "ยังไม่เลือก"}
                       </p>
                       <p>
                         <strong>อายุ:</strong>{" "}
@@ -397,10 +349,9 @@ const Bookingbarber = () => {
                 </div>
 
                 {/* Section วัน-เวลา */}
-
-                <p className="text-lg font-bold mt-4">วันที่จอง</p>
+                <p className="text-base sm:text-lg font-bold mt-4">วันที่จอง</p>
                 <hr />
-                <div className="mt-2 space-y-2">
+                <div className="mt-2 space-y-2 text-sm sm:text-base">
                   <div className="flex justify-between">
                     <strong>วันที่</strong>
                     <span>{selectedDate.format("DD MMMM YYYY")}</span>
@@ -411,19 +362,15 @@ const Bookingbarber = () => {
                   </div>
                   <div className="flex justify-between">
                     <strong>เวลาบริการ:</strong>
-                    <span>
-                      {Service ? `${Service.duration} นาที` : "ยังไม่เลือก"}
-                    </span>
+                    <span>{Service ? `${Service.duration} นาที` : "ยังไม่เลือก"}</span>
                   </div>
                   <div className="flex justify-between">
                     <strong>ค่าบริการ:</strong>
-                    <span>
-                      {Service ? `${Service.price} บาท` : "ยังไม่เลือก"}
-                    </span>
+                    <span>{Service ? `${Service.price} บาท` : "ยังไม่เลือก"}</span>
                   </div>
                 </div>
 
-                <p className="text-center text-sm mt-4">
+                <p className="text-center text-xs sm:text-sm mt-4">
                   **หมายเหตุ** โปรดมาตรงเวลา
                 </p>
               </div>
@@ -432,13 +379,13 @@ const Bookingbarber = () => {
               <div className="mt-4 flex flex-col sm:flex-row justify-between gap-2">
                 <button
                   onClick={cancelBooking}
-                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700 w-full sm:w-auto"
+                  className="bg-red-500 text-white px-3 py-1 sm:px-4 sm:py-2 rounded hover:bg-red-700 w-full sm:w-auto"
                 >
                   ยกเลิก
                 </button>
                 <button
                   onClick={handleBooking}
-                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full sm:w-auto"
+                  className="bg-green-500 text-white px-3 py-1 sm:px-4 sm:py-2 rounded hover:bg-green-600 w-full sm:w-auto"
                 >
                   ยืนยันการจอง
                 </button>
@@ -447,55 +394,58 @@ const Bookingbarber = () => {
           </div>
         )}
 
-        <div className="container mt-24 mx-auto">
-          <h1 className="text-2xl font-bold text-gray-800 p-2 ml-20 uppercase">
+        <div className="container mt-16 sm:mt-20 md:mt-24 mx-auto px-4">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 p-2 uppercase text-center sm:text-left">
             Booking
           </h1>
-          <div className="flex justify-between w-full">
+          <div className="flex flex-col lg:flex-row justify-between w-full gap-6">
             {/* Barber Section */}
-            <div className="ml-10 w-full mr-2 p-2">
-              <h1 className="text-xl font-bold text-gray-800 p-2 capitalize">
+            <div className="w-full lg:w-2/3 p-2">
+              <h1 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 p-2 capitalize text-center sm:text-left">
                 Barber
               </h1>
-              <hr className="bg-black border-black text-black border px-2 mb-5" />
+              <hr className="bg-black border-black border mb-5 mx-auto w-3/4 sm:w-full" />
               {employees.map((employee, index) => (
                 <div
                   key={index}
-                  onClick={() => handleSelectEmployee(employee)} // เมื่อคลิกเลือกพนักงาน
-                  className={`bg-black relative shadow-md rounded-lg border mb-2 p-4 h-auto flex flex-col sm:flex-row transition duration-300 hover:-translate-y-3 hover:shadow-lg cursor-pointer 
-                  ${
-                    selectedEmployeeId === employee
-                      ? "border-4 border-blue-500 "
-                      : ""
-                  }`} // เพิ่ม border สีฟ้าเมื่อเลือกพนักงาน
+                  onClick={() => handleSelectEmployee(employee)}
+                  className={`bg-black relative shadow-md rounded-lg border mb-4 p-4 flex flex-col sm:flex-row gap-4 transition duration-300 hover:-translate-y-3 hover:shadow-lg cursor-pointer 
+                    ${
+                      selectedEmployeeId === employee
+                        ? "border-4 border-blue-500"
+                        : ""
+                    }`}
                 >
                   <div
-                    className="bg-cover bg-center h-[150px] sm:h-[200px] sm:w-[150px] md:h-[250px] md:w-[200px] rounded-lg"
+                    className="bg-cover bg-center h-32 sm:h-40 md:h-48 w-full sm:w-32 md:w-40 rounded-lg flex-shrink-0"
                     style={{
                       backgroundImage: `url(${employee.employee_image_url})`,
                     }}
                   ></div>
-                  <div className="text-md text-white flex-1 px-4 mt-4 sm:mt-0 sm:pl-4">
-                    <p className="font-bold text-xl">
-                      Name : {`${employee.first_name} ${employee.last_name}`}
+                  <div className="text-white flex-1 text-center sm:text-left mt-2 sm:mt-0">
+                    <p className="font-bold text-base sm:text-lg md:text-xl">
+                      Name: {`${employee.first_name} ${employee.last_name}`}
                     </p>
-                    <p className="mt-1">NickName : {employee.nickname}</p>
-                    <p className="mt-1">Gender : {employee.gender}</p>
-                    <p className="mt-1">
-                      Age : {calculateAge(employee.dob)} years
+                    <p className="mt-1 text-xs sm:text-sm">
+                      NickName: {employee.nickname}
                     </p>
-                    <p className="mt-1">Position: {employee.position}</p>
-                    <div className="flex items-center gap-1">
-                      <p>Position:</p>
+                    <p className="mt-1 text-xs sm:text-sm">
+                      Gender: {employee.gender}
+                    </p>
+                    <p className="mt-1 text-xs sm:text-sm">
+                      Age: {calculateAge(employee.dob)} years
+                    </p>
+                    <p className="mt-1 text-xs sm:text-sm">
+                      Position: {employee.position}
+                    </p>
+                    <div className="flex justify-center sm:justify-start gap-1 mt-1 text-xs sm:text-sm">
+                      <p>Status:</p>
                       <p
                         className={`${
                           employee.status === "Active" ? "text-green-500" : ""
-                        } 
-                                    ${
-                                      employee.status === "Inactive"
-                                        ? "text-red-500"
-                                        : ""
-                                    }`}
+                        } ${
+                          employee.status === "Inactive" ? "text-red-500" : ""
+                        }`}
                       >
                         {employee.status}
                       </p>
@@ -506,16 +456,16 @@ const Bookingbarber = () => {
             </div>
 
             {/* Date & Time Section */}
-            <div className="w-full md:w-1/2 lg:w-1/3 mx-auto p-2">
-              <h1 className="text-xl font-bold text-gray-800 p-2 capitalize text-center">
+            <div className="w-full lg:w-1/3 p-2">
+              <h1 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 p-2 capitalize text-center">
                 Select Date & Time
               </h1>
-              <hr className="border-black mb-4" />
+              <hr className="border-black mb-4 mx-auto w-3/4 sm:w-full" />
               {/* Calendar Picker */}
               <div className="bg-black p-4 shadow-md rounded-md text-white">
                 <div className="flex justify-between items-center mb-2">
                   <button
-                    className={`text-white hover:text-black ${
+                    className={`text-white hover:text-gray-300 ${
                       selectedDate.isSame(today, "month")
                         ? "opacity-50 cursor-not-allowed"
                         : ""
@@ -527,11 +477,11 @@ const Bookingbarber = () => {
                   >
                     &lt;
                   </button>
-                  <span className="font-semibold text-lg">
+                  <span className="font-semibold text-sm sm:text-base md:text-lg">
                     {selectedDate.format("MMMM YYYY")}
                   </span>
                   <button
-                    className="text-white hover:text-black"
+                    className="text-white hover:text-gray-300"
                     onClick={() =>
                       setSelectedDate((prev) => prev.add(1, "month"))
                     }
@@ -539,7 +489,7 @@ const Bookingbarber = () => {
                     &gt;
                   </button>
                 </div>
-                <div className="grid grid-cols-7 text-center">
+                <div className="grid grid-cols-7 gap-1 text-center text-xs sm:text-sm">
                   {["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"].map((day) => (
                     <div key={day} className="font-semibold text-white">
                       {day}
@@ -550,12 +500,12 @@ const Bookingbarber = () => {
                     return (
                       <button
                         key={index}
-                        className={`p-2 w-full ${
+                        className={`p-1 sm:p-2 w-full ${
                           fullDate.isBefore(today, "day")
                             ? "opacity-50 cursor-not-allowed"
                             : fullDate.isSame(selectedDate, "day")
                             ? "bg-blue-500 text-white rounded-full"
-                            : "hover:bg-gray-200"
+                            : "hover:bg-gray-700"
                         }`}
                         onClick={() => setSelectedDate(fullDate)}
                         disabled={fullDate.isBefore(today, "day")}
@@ -566,13 +516,13 @@ const Bookingbarber = () => {
                   })}
                 </div>
               </div>
-              <div className="text-center text-lg font-semibold text-gray-700 my-2">
-                เลือกวันที่ : {selectedDate.format("DD MMMM YYYY")}
+              <div className="text-center text-sm sm:text-base font-semibold text-gray-700 my-2">
+                เลือกวันที่: {selectedDate.format("DD MMMM YYYY")}
               </div>
 
               {/* Time Selector */}
-              <div className="flex flex-col space-y-2 my-4 w-full justify-center">
-                <div className="grid grid-cols-3 gap-2">
+              <div className="flex flex-col space-y-2 my-4 w-full">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {availableTimes.map((time, index) => {
                     const isPast = isPastTime(
                       time,
@@ -580,14 +530,13 @@ const Bookingbarber = () => {
                     );
                     const isBooked = bookedTimes.includes(time);
                     const isDisabled = isPast || isBooked;
-
                     const isSelected =
-                      time === selectedTimeText.replace("Selected Time: ", ""); // เช็คว่าเป็นเวลาที่เลือกหรือไม่
+                      time === selectedTimeText.replace("Selected Time: ", "");
 
                     return (
                       <button
                         key={index}
-                        className={`px-4 py-2 rounded-md text-center whitespace-nowrap transition 
+                        className={`px-2 py-1 sm:px-4 sm:py-2 rounded-md text-center text-xs sm:text-sm whitespace-nowrap transition 
                           ${
                             isBooked
                               ? "bg-red-500 text-white cursor-not-allowed"
@@ -603,10 +552,7 @@ const Bookingbarber = () => {
                               ? "bg-black text-white hover:bg-opacity-80"
                               : ""
                           }
-                          ${
-                            isSelected ? "bg-blue-500 text-black " : ""
-                          }  // สีจางๆ เมื่อเลือกแล้ว
-                        `}
+                          ${isSelected ? "bg-blue-500 text-white" : ""}`}
                         disabled={isDisabled}
                         onClick={() =>
                           !isDisabled && handleTimeSelect(index, time)
@@ -617,17 +563,16 @@ const Bookingbarber = () => {
                     );
                   })}
                 </div>
-
                 {selectedTimeText && (
-                  <div className="text-center text-lg font-semibold text-gray-700 my-2">
-                    เวลาที่เลือก : {convertToThaiTime(selectedTimeText)}
+                  <div className="text-center text-sm sm:text-base font-semibold text-gray-700 my-2">
+                    เวลาที่เลือก: {convertToThaiTime(selectedTimeText)}
                   </div>
                 )}
               </div>
-              <div className="flex justify-center gap-4 mt-6">
+              <div className="flex justify-center mt-6">
                 <button
                   onClick={handleBooking_modal}
-                  className="w-full py-2 bg-black text-white rounded-md hover:bg-gray-700"
+                  className="w-full max-w-xs sm:w-40 py-2 bg-black text-white rounded-md hover:bg-gray-700"
                 >
                   Confirm Booking
                 </button>
@@ -635,7 +580,7 @@ const Bookingbarber = () => {
             </div>
           </div>
         </div>
-        <div className="py-28"></div>
+        <div className="py-16 sm:py-20 md:py-28"></div>
       </Layout>
     </div>
   );

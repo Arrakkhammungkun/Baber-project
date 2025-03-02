@@ -281,20 +281,25 @@ def allowed_file(filename):
 
 
 @api_view(['POST'])
-
 def upload_profile(request):
     if 'profile_image' not in request.FILES:
         return JsonResponse({"error": "No file part"}, status=400)
 
     file = request.FILES['profile_image']
-
     if not ('.' in file.name and file.name.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}):
         return JsonResponse({"error": "File type not allowed"}, status=400)
 
+    # ดึงข้อมูล text
+    nick_name = request.data.get('nick_name')
+    first_name = request.data.get('first_name')
+    last_name = request.data.get('last_name')
+
+    # บันทึกไฟล์
     filename = secure_filename(file.name)
     save_path = os.path.join(settings.MEDIA_ROOT, 'profile_pics', filename)
     file_path = default_storage.save(save_path, ContentFile(file.read()))
 
+    # ดึง member จาก token
     token = request.headers.get("Authorization").split(" ")[1]
     payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
     member = Member.objects(id=payload['user_id']).first()
@@ -308,11 +313,30 @@ def upload_profile(request):
         if os.path.exists(old_file_path):
             os.remove(old_file_path)
 
-    # อัปเดตข้อมูลโปรไฟล์
-    member.profile_image = file_path
+    # อัปเดตข้อมูล
+    clean_path = os.path.join('profile_pics', filename).replace('\\', '/')
+    member.profile_image = clean_path
+    if nick_name:
+        member.nick_name = nick_name
+    if first_name:
+        member.first_name = first_name
+    if last_name:
+        member.last_name = last_name
     member.save()
 
-    return JsonResponse({"message": "File uploaded successfully", "path": member.profile_image}, status=200)
+    # ส่งข้อมูลผู้ใช้ทั้งหมดกลับไป
+    return JsonResponse({
+        "message": "File uploaded successfully",
+        "user": {
+            "user_id": str(member.id),
+            "first_name": member.first_name,
+            "last_name": member.last_name,
+            "nick_name": member.nick_name,
+            "email": member.email,
+            "phone_number": member.phone_number,
+            "profile_image": clean_path  
+        }
+    }, status=200)
 
 @api_view(['PUT'])
 @permission_classes([])
