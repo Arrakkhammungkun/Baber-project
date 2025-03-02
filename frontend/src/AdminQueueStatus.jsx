@@ -15,7 +15,7 @@ const AdminQueueStatus = () => {
     };
 
     newSocket.onmessage = (event) => {
-      console.log("WebSocket received:", event.data);
+      
       try {
         const data = JSON.parse(event.data);
 
@@ -57,8 +57,8 @@ const AdminQueueStatus = () => {
   const handleConfirmQueue = (id) => {
     fetch(`${apiUrl}/bookings/${id}/confirm/`, { method: "POST" })
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Queue confirmed:", data);
+      .then(() => {
+        
         // อัปเดตสถานะคิวเป็น "กำลังดำเนินการ"
         setQueue((prevQueue) =>
           prevQueue.map((q) =>
@@ -70,8 +70,8 @@ const AdminQueueStatus = () => {
   const handleCompleteQueue = (id) => {
     fetch(`${apiUrl}/bookings/${id}/complete/`, { method: "POST" })
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Queue completed:", data);
+      .then(() => {
+        
         // ลบคิวออกจาก state และย้ายไปที่ประวัติการให้บริการ
         setQueue((prevQueue) => prevQueue.filter((q) => q.id !== id));
       });
@@ -80,8 +80,8 @@ const AdminQueueStatus = () => {
   const handleDeleteQueue = (id) => {
     fetch(`${apiUrl}/bookings/${id}/delete/`, { method: "DELETE" })
       .then((response) => response.json())
-      .then((data) => {
-        console.log("Queue deleted:", data);
+      .then(() => {
+        
 
         setQueue((prevQueue) => prevQueue.filter((q) => q.id !== id));
 

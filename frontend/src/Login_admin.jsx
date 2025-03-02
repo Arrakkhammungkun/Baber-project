@@ -24,7 +24,7 @@ const Login = () => {
 
         login_Admin(admin, token);
 
-        console.log("Login successful:", data);
+       
 
         window.location.href = "/admin/dashboard";
       }
