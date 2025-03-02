@@ -145,7 +145,7 @@ const Login = () => {
 
           <div className="flex justify-start">
             <span className="text-white mr-1">New User?</span> {/* เปลี่ยน <a> เป็น <span> */}
-            <Link to="/register" className="text-[#4595ED] hover:underline">
+            <Link to="/register/step1" className="text-[#4595ED] hover:underline">
               Create an account
             </Link>
           </div>
