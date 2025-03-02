@@ -12,5 +12,6 @@ import os
 from django.core.asgi import get_asgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
-
+print(f"PORT from environment: {os.getenv('PORT')}")
+print(f"All environment variables: {os.environ}")
 application = get_asgi_application()

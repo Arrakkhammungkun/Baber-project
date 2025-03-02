@@ -18,10 +18,10 @@ const Booking_Management = () => {
     };
 
     newSocket.onmessage = (event) => {
-      console.log("WebSocket received:", event.data);
+      
       try {
         const data = JSON.parse(event.data);
-        console.log("Parsed data:", data);
+        
         if (data.delete) {
           setQueue((prevQueue) =>
             prevQueue.filter((q) => q.id !== data.delete)
