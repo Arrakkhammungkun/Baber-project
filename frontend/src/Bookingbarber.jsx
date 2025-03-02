@@ -274,10 +274,11 @@ const Bookingbarber = () => {
       setShowModal(false);
     } catch (error) {
       setShowModal(false);
-      console.error("Error making booking:", error.response.data);
+      console.error("Error making booking:", error.response?.data || error.message);
       Swal.fire({
         icon: "error",
-        title: "Failed to make booking. Please try again.",
+        title: "Failed to make booking",
+        text: error.response?.data?.message || "Please try again.",
         confirmButtonText: "ตกลง",
       });
       setIsLoading(false);
