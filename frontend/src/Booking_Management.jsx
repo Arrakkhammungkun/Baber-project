@@ -7,7 +7,7 @@ import LayoutAdmin from './components/LayoutAdmin';
 const Booking_Management = () => {
   const [queue, setQueue] = useState([]);
   const [socket, setSocket] = useState(null);
-
+  console.log(URLSOCKET)
   useEffect(() => {
     const newSocket = new WebSocket(`${URLSOCKET}/ws/queue/`);
     setSocket(newSocket);
