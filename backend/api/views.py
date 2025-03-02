@@ -33,7 +33,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny  # เพิ่มเพื่อให้ public
 from sib_api_v3_sdk import Configuration, ApiClient, TransactionalEmailsApi, SendSmtpEmail
 from .utils import generate_otp
-
+from django.core.files.storage import FileSystemStorage
 class SendOTPAPIView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
@@ -286,7 +286,7 @@ def upload_profile(request):
         return JsonResponse({"error": "No file part"}, status=400)
 
     file = request.FILES['profile_image']
-    if not ('.' in file.name and file.name.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}):
+    if not allowed_file(file.name):
         return JsonResponse({"error": "File type not allowed"}, status=400)
 
     # ดึงข้อมูล text
@@ -294,10 +294,14 @@ def upload_profile(request):
     first_name = request.data.get('first_name')
     last_name = request.data.get('last_name')
 
-    # บันทึกไฟล์
-    filename = secure_filename(file.name)
-    save_path = os.path.join(settings.MEDIA_ROOT, 'profile_pics', filename)
-    file_path = default_storage.save(save_path, ContentFile(file.read()))
+    # สร้างชื่อไฟล์ใหม่ที่ปลอดภัย
+    ext = file.name.rsplit('.', 1)[1].lower()
+    filename = f"{request.user.id}_{int(os.times().elapsed)}.{ext}"  # ใช้ user_id + timestamp
+    save_path = os.path.join('profile_pics', filename)  # path ภายใน media
+
+    # ใช้ FileSystemStorage เพื่อบันทึกไฟล์
+    fs = FileSystemStorage(location=settings.MEDIA_ROOT)
+    file_path = fs.save(save_path, file)
 
     # ดึง member จาก token
     token = request.headers.get("Authorization").split(" ")[1]
@@ -310,12 +314,11 @@ def upload_profile(request):
     # ลบไฟล์เก่าถ้ามี
     if member.profile_image:
         old_file_path = os.path.join(settings.MEDIA_ROOT, member.profile_image)
-        if os.path.exists(old_file_path):
+        if os.path.exists(old_file_path) and old_file_path != file_path:
             os.remove(old_file_path)
 
     # อัปเดตข้อมูล
-    clean_path = os.path.join('profile_pics', filename).replace('\\', '/')
-    member.profile_image = clean_path
+    member.profile_image = save_path.replace('\\', '/')  # ปรับ path ให้เป็น forward slash
     if nick_name:
         member.nick_name = nick_name
     if first_name:
@@ -334,10 +337,9 @@ def upload_profile(request):
             "nick_name": member.nick_name,
             "email": member.email,
             "phone_number": member.phone_number,
-            "profile_image": clean_path  
+            "profile_image": member.profile_image
         }
     }, status=200)
-
 @api_view(['PUT'])
 @permission_classes([])
 def update_name(request):

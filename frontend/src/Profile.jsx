@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "./contexts/AuthContext";
 import axios from "axios";
 import Layout from "./components/Layout";
+import Swal from "sweetalert2";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 const apiUrl_img = import.meta.env.VITE_API_IMG;
@@ -63,17 +64,34 @@ const ProfilePage = () => {
       setName(updatedUser.nick_name || "");
       setFirstName(updatedUser.first_name || "");
       setLastName(updatedUser.last_name || "");
-      setProfileImage(updatedUser.profile_image || ""); // อนุญาตให้ว่างได้
+      setProfileImage(updatedUser.profile_image || "");
       setFile(null);
       setFileUrl(null);
       fetchUser(updatedUser);
+      Swal.fire({
+        icon: "success",
+        title: "Profile updated successfully!",
+        confirmButtonText: "OK",
+      });
     } catch (err) {
       if (err.response) {
         setError(err.response.data.error || "Upload failed");
         console.log("Error response:", err.response.data);
+        Swal.fire({
+          icon: "error",
+          title: "Failed to update profile",
+          text: err.response.data.error || "Please try again.",
+          confirmButtonText: "OK",
+        });
       } else {
         setError("An error occurred. Please try again.");
         console.log("Error:", err.message);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "An unexpected error occurred.",
+          confirmButtonText: "OK",
+        });
       }
     } finally {
       setLoading(false);
@@ -188,7 +206,7 @@ const ProfilePage = () => {
                     <div className="w-full h-full flex justify-center items-center bg-gray-200">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-16 w-16 text-gray-500" // ปรับขนาดให้ใหญ่ขึ้นในหน้านี้
+                        className="h-16 w-16 text-gray-500"
                         viewBox="0 0 448 512"
                         fill="currentColor"
                       >
@@ -221,7 +239,6 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
-      <div className=""></div>
     </Layout>
   );
 };
