@@ -146,17 +146,17 @@ function Home() {
                   desc: "ตัดผมสวย โดนใจ ด้วยช่างมืออาชีพที่ใส่ใจคุณ",
                 },
                 {
-                  img: "/src/img/razor.png",
+                  img: "/img/razor.png",
                   title: "shaving",
                   desc: "เปลี่ยนทุกสัมผัสให้เรียบเนียนในแบบที่คุณมั่นใจ",
                 },
                 {
-                  img: "/src/img/hair-clipper.png",
+                  img: "/img/hair-clipper.png",
                   title: "trimming",
                   desc: "เติมความเป๊ะในทุกเส้น สร้างลุคที่ลงตัว",
                 },
                 {
-                  img: "/src/img/comb.png",
+                  img: "/img/comb.png",
                   title: "style&care",
                   desc: "สร้างสไตล์ที่ใช่ พร้อมดูแลเส้นผมให้สุขภาพดี",
                 },
