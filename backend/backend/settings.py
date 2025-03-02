@@ -142,7 +142,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # ระบุ domain ที่ frontend ใช้
+    "http://localhost:5173",          # ไว้สำหรับ local development
+    "https://baber-project.vercel.app", # เพิ่ม domain ของ frontend บน Vercel
 ]
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
