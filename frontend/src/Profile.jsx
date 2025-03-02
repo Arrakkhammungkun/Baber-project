@@ -21,11 +21,12 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (user) {
-      console.log("profile", user);
+      console.log("Profile data:", user);
       setName(user.nick_name || "");
       setFirstName(user.first_name || "");
       setLastName(user.last_name || "");
       setProfileImage(user.profile_image || "");
+      console.log("Profile image URL:", `${apiUrl_img}${user.profile_image}`);
     }
   }, [user]);
 
@@ -36,6 +37,11 @@ const ProfilePage = () => {
       setFile(selectedFile);
       setFileUrl(URL.createObjectURL(selectedFile));
     }
+  };
+
+  const handleImageError = () => {
+    console.error("Failed to load profile image");
+    setError("Could not load profile image");
   };
 
   const handleSave = async (e) => {
@@ -201,6 +207,7 @@ const ProfilePage = () => {
                       src={`${apiUrl_img}${profileImage}`}
                       alt="Profile"
                       className="w-full h-full object-cover"
+                      onError={() => console.error("Failed to load image:", `${apiUrl_img}${profileImage}`)}
                     />
                   ) : (
                     <div className="w-full h-full flex justify-center items-center bg-gray-200">
