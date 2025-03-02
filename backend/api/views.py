@@ -296,12 +296,23 @@ def upload_profile(request):
 
     # สร้างชื่อไฟล์ใหม่ที่ปลอดภัย
     ext = file.name.rsplit('.', 1)[1].lower()
-    filename = f"{request.user.id}_{int(os.times().elapsed)}.{ext}"  # ใช้ user_id + timestamp
-    save_path = os.path.join('profile_pics', filename)  # path ภายใน media
+    filename = f"profile_{request.user.id}_{int(os.times().elapsed)}.{ext}"
+    save_path = os.path.join('profile_pics', filename)
 
-    # ใช้ FileSystemStorage เพื่อบันทึกไฟล์
+    # ตรวจสอบและสร้าง directory
+    profile_pics_dir = os.path.join(settings.MEDIA_ROOT, 'profile_pics')
+    os.makedirs(profile_pics_dir, exist_ok=True)
+
+    # บันทึกไฟล์
     fs = FileSystemStorage(location=settings.MEDIA_ROOT)
-    file_path = fs.save(save_path, file)
+    try:
+        file_path = fs.save(save_path, file)
+        full_file_path = fs.path(file_path)
+        print(f"File saved at: {full_file_path}")  # Debug log
+        if not os.path.exists(full_file_path):
+            return JsonResponse({"error": "File was not saved on server"}, status=500)
+    except Exception as e:
+        return JsonResponse({"error": f"Failed to save file: {str(e)}"}, status=500)
 
     # ดึง member จาก token
     token = request.headers.get("Authorization").split(" ")[1]
@@ -314,11 +325,15 @@ def upload_profile(request):
     # ลบไฟล์เก่าถ้ามี
     if member.profile_image:
         old_file_path = os.path.join(settings.MEDIA_ROOT, member.profile_image)
-        if os.path.exists(old_file_path) and old_file_path != file_path:
-            os.remove(old_file_path)
+        if os.path.exists(old_file_path) and old_file_path != full_file_path:
+            try:
+                os.remove(old_file_path)
+                print(f"Old file deleted: {old_file_path}")  # Debug log
+            except Exception as e:
+                print(f"Failed to delete old file: {e}")
 
     # อัปเดตข้อมูล
-    member.profile_image = save_path.replace('\\', '/')  # ปรับ path ให้เป็น forward slash
+    member.profile_image = save_path.replace('\\', '/')
     if nick_name:
         member.nick_name = nick_name
     if first_name:
@@ -327,7 +342,6 @@ def upload_profile(request):
         member.last_name = last_name
     member.save()
 
-    # ส่งข้อมูลผู้ใช้ทั้งหมดกลับไป
     return JsonResponse({
         "message": "File uploaded successfully",
         "user": {
@@ -340,6 +354,8 @@ def upload_profile(request):
             "profile_image": member.profile_image
         }
     }, status=200)
+
+
 @api_view(['PUT'])
 @permission_classes([])
 def update_name(request):
