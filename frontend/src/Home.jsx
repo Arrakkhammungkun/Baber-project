@@ -9,22 +9,22 @@ function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [scrolling, setScrolling] = useState(false);
   const items = [
-    "/src/img/3.jpg",
-    "/src/img/2.jpg",
-    "/src/img/5.jpg",
-    "/src/img/6.jpg",
-    "/src/img/7.jpg",
-    "/src/img/8.jpg",
-    "/src/img/9.jpg",
+    "/img/3.jpg",
+    "/img/2.jpg",
+    "/img/5.jpg",
+    "/img/6.jpg",
+    "/img/7.jpg",
+    "/img/8.jpg",
+    "/img/9.jpg",
   ];
   const itemsa = [
-    "/src/img/2.jpg",
-    "/src/img/10.jpg",
-    "/src/img/11.jpg",
-    "/src/img/12.jpg",
-    "/src/img/13.jpg",
-    "/src/img/3.jpg",
-    "/src/img/4.jpg",
+    "/img/2.jpg",
+    "/img/10.jpg",
+    "/img/11.jpg",
+    "/img/12.jpg",
+    "/img/13.jpg",
+    "/img/3.jpg",
+    "/img/4.jpg",
   ];
 
   useEffect(() => {
@@ -53,7 +53,7 @@ function Home() {
       <Layout>
         <div className="h-full overflow-hidden">
           {/* Hero Section */}
-          <div className="bg-[url(/src/img/welcome.jpg)] bg-cover bg-center h-screen w-full flex items-center justify-center bg-fixed">
+          <div className="bg-[url(/img/welcome.jpg)] bg-cover bg-center h-screen w-full flex items-center justify-center bg-fixed">
             <div className="absolute inset-0 bg-black/50"></div>
             <div className="relative flex flex-col w-full px-4 sm:px-6 md:px-10 text-white">
               <div className="grid grid-cols-2 gap-2 sm:gap-4 tracking-tighter">
@@ -108,7 +108,7 @@ function Home() {
 
             {/* Story Section */}
             <div className="flex flex-col md:flex-row justify-between gap-4 sm:gap-6 md:gap-8 mb-10">
-              <div className="shadow-xl shadow-gray-400 bg-[url(/src/img/3.jpg)] bg-cover bg-center w-full md:w-1/2 h-40 sm:h-48 md:h-56 lg:h-64 xl:h-80 rounded-lg"></div>
+              <div className="shadow-xl shadow-gray-400 bg-[url(/img/3.jpg)] bg-cover bg-center w-full md:w-1/2 h-40 sm:h-48 md:h-56 lg:h-64 xl:h-80 rounded-lg"></div>
               <div className="w-full md:w-1/2 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl">
                 STYLEX ไม่เพียงแต่เป็นร้านตัดผมที่ให้บริการออกแบบทรงผมเท่านั้น
                 แต่ยังมาพร้อมกับระบบออนไลน์ที่ทันสมัยเพื่อความสะดวกสบายของลูกค้า
@@ -122,7 +122,7 @@ function Home() {
               </div>
             </div>
             <div className="flex flex-col md:flex-row-reverse justify-between gap-4 sm:gap-6 md:gap-8 mb-10">
-              <div className="shadow-xl shadow-gray-400 bg-[url(/src/img/4.jpg)] bg-cover bg-center w-full md:w-1/2 h-40 sm:h-48 md:h-56 lg:h-64 xl:h-80 rounded-lg"></div>
+              <div className="shadow-xl shadow-gray-400 bg-[url(/img/4.jpg)] bg-cover bg-center w-full md:w-1/2 h-40 sm:h-48 md:h-56 lg:h-64 xl:h-80 rounded-lg"></div>
               <div className="w-full md:w-1/2 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl">
                 STYLEX
                 เกิดขึ้นจากความหลงใหลในศิลปะการสร้างสรรค์ทรงผมและการดูแลเส้นผมอย่างมืออาชีพ
