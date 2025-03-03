@@ -195,8 +195,9 @@ const Booking_Management = () => {
                       <p>
                         เวลาเริ่ม: {formatTime(q.start_time)} น.
                       </p>
+
                       <p>
-                        เวลาเสร็จ: {formatTime(q.end_time)} น.
+                        เบอร์โทร: {q.customer.phone_number}
                       </p>
                     </div>
                     <div className="flex space-x-3 ml-auto pt-0 items-start justify-end">
