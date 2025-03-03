@@ -54,6 +54,7 @@ class QueueConsumer(AsyncWebsocketConsumer):
                     "last_name": b.customer.last_name,
                     "email": b.customer.email,
                     "profile": b.customer.profile_image,
+                    "phone_number": b.customer.phone_number,
                 },
                 "employee": {
                     "id": employee_id,
@@ -104,6 +105,7 @@ class QueueConsumer(AsyncWebsocketConsumer):
                     "last_name": b.customer.last_name,
                     "email": b.customer.email,
                     "profile": b.customer.profile_image,
+                    "phone_number": b.customer.phone_number,
                 },
                 "employee": {
                     "id": employee_id,
