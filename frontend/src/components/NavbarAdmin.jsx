@@ -22,7 +22,7 @@ const NavbarAdmin = () => {
     setTimeout(() => {
       logoutAdmin(); // ล้าง admin token
       setIsLoading(false); // ปิด Loader
-      navigate('/login/admin'); // Redirect ไปหน้า login admin
+      navigate('/login'); // Redirect ไปหน้า login admin
     }, 1000); // จำลองโหลด 1 วินาที
   };
 
